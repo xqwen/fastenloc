@@ -31,13 +31,15 @@ fastenloc -e gtex_v8.eqtl_annot.vcf.gz -g Height.gwas.pip -t Whole_Blood -prefix
     + column 1: signal cluster name (from eQTL analysis)
     + column 2: number of member SNPs
     + column 3: cluster PIP of eQTLs
-    + column 4: cluster PIP of GWAS hits (note this value is obtained ***without*** eQTL priors)
-    + column 5: regional colocalization probability (RCP)
+    + column 4: cluster PIP of GWAS hits (***without*** eQTL prior)
+    + column 5: cluster PIP of GWAS hits (***with*** eQTL prior)
+    + column 6: regional colocalization probability (RCP)
 3. SNP-level colocalization result ``prefix.enloc.snp.out``: SNP-level colocalization output with the following format
     + column 1: signal cluster name
     + column 2: SNP name
     + column 3: SNP-level PIP of eQTLs
-    + column 4: SNP-level PIP of GWAS (prior assuming no knowledge of eQTLs)
-    + column 5: SNP-level colocalization probability
+    + column 4: SNP-level PIP of GWAS (without eQTL prior)
+    + column 5: SNP-level PIP of GWAS (with eQTL prior)
+    + column 6: SNP-level colocalization probability
 
 

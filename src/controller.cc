@@ -313,33 +313,44 @@ void controller::compute_coloc_prob(){
         
         double nc = ((1-pi1)/pi1)/(1-gprob_null);
         double sum_bf = nc - (1-pi1)/pi1;
+        vector<double> bf_vec;
+
+        for(int k=0;k<eqtl_vec[i].snp_vec.size();k++){
+            double bf = gprob_vec_null[k]*nc;
+            bf_vec.push_back(bf);
+        }
+
+
+        double gwas_cpip = 0;
         for(int k=0;k<eqtl_vec[i].snp_vec.size();k++){
             string snp = eqtl_vec[i].snp_vec[k];
             double d = gprob_vec_null[k];
             double r = eqtl_vec[i].pip_vec[k];
-            double bf = d*nc;
-            double prob = pi1_e*(1-pi1_ne)*bf/((1-pi1_ne)*(1-pi1_e)+pi1_ne*(1-pi1_e)*(sum_bf-bf)+pi1_e*(1-pi1_ne)*bf);
+            double prob = pi1_e*(1-pi1_ne)*bf_vec[k]/((1-pi1_ne)*(1-pi1_e)+pi1_ne*(1-pi1_e)*(sum_bf-bf_vec[k])+pi1_e*(1-pi1_ne)*bf_vec[k]);
             // snp level coloc prob
             double p_coloc = prob*r;
             double gprob_e = p_coloc;
             eqtl_vec[i].coloc_prob += p_coloc;
 
             //other non-coloc possibilities
-            /*
-           prob = bf/((1-pi1_ne)/pi1_ne + sum_bf)   
+           // no eqtl, k-th SNP is the gwas hit
+           prob = bf_vec[k]/((1-pi1_ne)/pi1_ne + sum_bf);   
            gprob_e += prob*(1-eqtl_vec[i].cpip);
+
+           // j-th SNP is the eQTL, and k-th SNP is the GWAS 
            for(int j=0;j<eqtl_vec[i].snp_vec.size();j++){
                if(j==k)
                    continue;
-               prob = pi1_ne*(1-pi1_e)*bf/( (1-pi1_e)*(1-pi1_ne) + pi1_ne*(1-pi1_e)*(sum_bf-bf[j])+pi1_e*(1-pi1_ne)*bf[j]);
+               prob = pi1_ne*(1-pi1_e)*bf_vec[k]/( (1-pi1_e)*(1-pi1_ne) + pi1_ne*(1-pi1_e)*(sum_bf-bf_vec[j])+pi1_e*(1-pi1_ne)*bf_vec[j]);
                gprob_e += prob* eqtl_vec[i].pip_vec[j];
            }
-           */ 
-           fprintf(fd1,"%15s   %15s   %7.3e %7.3e         %7.3e\n",eqtl_vec[i].id.c_str(), snp.c_str(), r,d,  p_coloc);
+           
+           fprintf(fd1,"%15s   %15s   %7.3e %7.3e    %7.3e      %7.3e\n",eqtl_vec[i].id.c_str(), snp.c_str(), r,d, gprob_e,  p_coloc);
+           gwas_cpip += gprob_e; 
         }
             
 
-        fprintf(fd2, "%15s   %4d  %7.3e %7.3e   %7.3e\n",eqtl_vec[i].id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_null, eqtl_vec[i].coloc_prob);
+        fprintf(fd2, "%15s   %4d  %7.3e %7.3e    %7.3e      %7.3e\n",eqtl_vec[i].id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_null, gwas_cpip, eqtl_vec[i].coloc_prob);
 
     }
 
