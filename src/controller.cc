@@ -141,7 +141,7 @@ void controller::load_gwas_torus(char *gwas_file){
         ins.str(line);
 
 
-        if(ins>>snp_id>>sig_id>>posterior>>prior){
+        if(ins>>snp_id>>sig_id>>posterior){
             if(snp_index.find(snp_id) == snp_index.end()){
                 snp_index[snp_id] = snp_vec.size();
                 snp_vec.push_back(snp_id);

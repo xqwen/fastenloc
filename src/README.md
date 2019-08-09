@@ -11,6 +11,18 @@ torus -d Height.torus.zval.gz --load_zval -dump_pip Height.gwas.pip
 gzip Height.gwas.pip
 ```
 
+## GWAS data input
+
+The required GWAS input format is
+
+```
+SNP_ID  LOCUS_ID  Posterior_Inclusion_Prob
+```
+
+The PIP can be generated from any Bayesian fine-mapping algorithms (DAP-G, CAVIAR, etc.). The sample GWAS data is generated from ```torus``` based on the z-scores and the locus partition algorithm by Berisa and Pickrell.   
+
+
+
 ## Running colocalization
 
 Command line syntax
