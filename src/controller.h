@@ -3,7 +3,7 @@ using namespace std;
 #include "sigCluster.h"
 #include <vector>
 #include <map>
-
+#include <string>
 
 class controller {
 
