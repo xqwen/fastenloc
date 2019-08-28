@@ -1,5 +1,6 @@
 #include "controller.h"
 #include <iostream>
+#include <string>
 #include <fstream>
 #include <sstream>
 #include <string.h>
@@ -9,7 +10,6 @@
 #include <gsl/gsl_rng.h>
 #include <math.h>
 #include <omp.h>
-
 
 void controller::load_eqtl(char *eqtl_file, char *tissue){
 
@@ -87,7 +87,7 @@ void controller::load_eqtl(char *eqtl_file, char *tissue){
                     }
 
                     int index = eqtl_sig_index[sig_id];
-                    double val = stod(pip);
+                    double val = atof(pip.c_str());
                     eqtl_vec[index].cpip += val;
                     eqtl_vec[index].snp_vec.push_back(snp_id);
                     eqtl_vec[index].pip_vec.push_back(val);
