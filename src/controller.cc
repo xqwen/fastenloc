@@ -27,6 +27,7 @@ void controller::load_eqtl(char *eqtl_file, char *tissue){
     string target_tissue = string(tissue);
 
 
+
     string chr;
     string pos;
     string snp_id; // important
@@ -58,13 +59,13 @@ void controller::load_eqtl(char *eqtl_file, char *tissue){
                 size_t pos4 = token.find("]");
                 string sig_id;
                 string tissue_type;
-                if(pos1 != string::npos){
+                if(pos1 != string::npos && pos2-pos1>1){
                     tissue_type = token.substr(pos1+1,pos2-pos1-1);
-                    sig_id = token.substr(0,pos1);
-                }else{
-                    sig_id = token.substr(0,pos2);
                 }
+                
+                sig_id = token.substr(0,pos1);
 
+                //printf("sig id = %s %d %d\n",sig_id.c_str(),pos2,pos1);
                 string pip = token.substr(pos2+1,pos3-pos2-1);
                 string sig_pip = token.substr(pos3+1, pos4-pos3-1);
                 //processing
@@ -87,7 +88,7 @@ void controller::load_eqtl(char *eqtl_file, char *tissue){
                     }
 
                     int index = eqtl_sig_index[sig_id];
-                    double val = stod(pip);
+                    double val = atof(pip.c_str());
                     eqtl_vec[index].cpip += val;
                     eqtl_vec[index].snp_vec.push_back(snp_id);
                     eqtl_vec[index].pip_vec.push_back(val);

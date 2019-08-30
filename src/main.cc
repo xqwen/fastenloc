@@ -20,6 +20,7 @@ int main(int argc, char **argv){
     memset(tissue, 0, LENGTH);
     memset(prefix, 0, LENGTH);
 
+
     int ImpN = 25;
     int nthread = 1;
 
