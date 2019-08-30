@@ -1,5 +1,6 @@
 #include "controller.h"
 #include <iostream>
+#include <string>
 #include <fstream>
 #include <sstream>
 #include <string.h>
@@ -9,7 +10,6 @@
 #include <gsl/gsl_rng.h>
 #include <math.h>
 #include <omp.h>
-
 
 void controller::load_eqtl(char *eqtl_file, char *tissue){
 
