@@ -29,11 +29,22 @@ class controller {
         
         double a0_est;
         double a1_est;
+        
+        // for enrichment prior
+        double pseudo_count;
+        double P_eqtl;
+        double P_gwas;
+
+
 
     public:
 
         void set_imp_num(int imp){
             ImpN = imp;
+        }
+
+        void set_pseudo_count (double pc){
+            pseudo_count = pc;
         }
 
         void set_thread(int thread){

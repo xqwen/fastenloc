@@ -109,6 +109,7 @@ void controller::load_eqtl(char *eqtl_file, char *tissue){
 
     fprintf(stderr, "read in %d SNPs, %d eQTL signal clusters, %.1f expected eQTLs\n\n", int(snp_vec.size()), int(eqtl_vec.size()), sum);
 
+    P_eqtl = sum/snp_vec.size();
 
 }
 
@@ -179,6 +180,9 @@ void controller::load_gwas_torus(char *gwas_file){
     pi1 = gwas_sum/gwas_count; 
 
     fprintf(stderr, "read in %d SNPs (eQTL+gwas), %d GWAS loci, %.1f expected hits\n\n", int(snp_vec.size()), int(gwas_vec.size()), gwas_sum);
+
+    P_gwas = gwas_sum/snp_vec.size();
+
 }
 
 
@@ -371,16 +375,22 @@ vector<double> controller::run_EM(vector<int> &eqtl_sample){
     double r0 = exp(a0);
     double r_null = pi1/(1-pi1);
 
-
+    
 
 
     while(1){
-
+        /*
         // E-step
         double e0g0 = 0;
         double e0g1 = 0;
         double e1g0 = 0;
         double e1g1 = 0;
+        */
+        // pseudo count/ shrinkage 
+        double e0g0 = pseudo_count*(1-P_gwas)*(1-P_eqtl);
+        double e0g1 = pseudo_count*(1-P_eqtl)*P_gwas;;
+        double e1g0 = pseudo_count*(1-P_gwas)*P_eqtl;;
+        double e1g1 = pseudo_count*P_gwas*P_eqtl;;
 
         for(int i=0;i<snp_vec.size();i++){
 

@@ -23,6 +23,7 @@ int main(int argc, char **argv){
 
     int ImpN = 25;
     int nthread = 1;
+    double pc = 1;
 
     for(int i=1;i<argc;i++){
 
@@ -46,6 +47,11 @@ int main(int argc, char **argv){
             continue;
         }
                                     
+        if(strcmp(argv[i], "-pc")==0 || strcmp(argv[i], "-pseudo_count")==0){
+            pc = atof(argv[++i]);
+            continue;
+        }
+
         if(strcmp(argv[i], "-thread")==0){
             nthread = atoi(argv[++i]);
             continue;
@@ -68,6 +74,7 @@ int main(int argc, char **argv){
     con.set_imp_num(ImpN);
     con.set_thread(nthread);
     con.set_prefix(prefix);
+    con.set_pseudo_count(pc);
 
     con.load_eqtl(eqtl_file, tissue);
     con.load_gwas_torus(gwas_file);
