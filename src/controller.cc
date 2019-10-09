@@ -70,7 +70,7 @@ void controller::load_eqtl(char *eqtl_file, char *tissue){
                 string sig_pip = token.substr(pos3+1, pos4-pos3-1);
                 //processing
 
-                if(strlen(tissue)==0 || tissue_type == target_tissue){    
+                if(strlen(tissue)==0 || tissue_type.compare(target_tissue)==0){    
 
 
                     if(snp_index.find(snp_id) == snp_index.end()){
@@ -80,7 +80,7 @@ void controller::load_eqtl(char *eqtl_file, char *tissue){
 
 
                     if(eqtl_sig_index.find(sig_id) == eqtl_sig_index.end()){
-                        eqtl_sig_index[sig_id] = eqtl_sig_index.size();
+                        eqtl_sig_index[sig_id] = eqtl_vec.size();
                         sigCluster cluster;
                         cluster.id = sig_id;
                         cluster.cpip = 0;
@@ -151,7 +151,7 @@ void controller::load_gwas_torus(char *gwas_file){
 
 
             if(gwas_sig_index.find(sig_id) == gwas_sig_index.end()){
-                gwas_sig_index[sig_id] = gwas_sig_index.size();
+                gwas_sig_index[sig_id] = gwas_vec.size();
                 sigCluster cluster;
                 cluster.id = sig_id;
                 cluster.cpip = 0;
