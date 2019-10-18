@@ -19,7 +19,7 @@ void controller::load_eqtl(char *eqtl_file, char *tissue){
 
     in.push(boost::iostreams::gzip_decompressor());
     in.push(dfile);
-
+    
 
     string line;
     istringstream ins;
@@ -72,8 +72,7 @@ void controller::load_eqtl(char *eqtl_file, char *tissue){
 
                 if(strlen(tissue)==0 || tissue_type.compare(target_tissue)==0){    
 
-
-                    if(snp_index.find(snp_id) == snp_index.end()){
+                   if(snp_index.find(snp_id) == snp_index.end()){
                         snp_index[snp_id] = snp_vec.size();
                         snp_vec.push_back(snp_id);
                     }
@@ -108,9 +107,13 @@ void controller::load_eqtl(char *eqtl_file, char *tissue){
     }
 
     fprintf(stderr, "read in %d SNPs, %d eQTL signal clusters, %.1f expected eQTLs\n\n", int(snp_vec.size()), int(eqtl_vec.size()), sum);
+    
+    if(total_snp == 0)
+        total_snp = snp_vec.size();
+    
 
-    P_eqtl = sum/snp_vec.size();
-
+    P_eqtl = sum/total_snp;
+    // fprintf(stderr, "%d  %d    %7.3e  %f\n", int(snp_vec.size()), total_snp, P_eqtl, sum);
 }
 
 
@@ -177,11 +180,13 @@ void controller::load_gwas_torus(char *gwas_file){
         }
     }
     
-    pi1 = gwas_sum/gwas_count; 
+    if(total_snp == 0)
+        total_snp = gwas_count;
+    pi1 = gwas_sum/total_snp; 
 
     fprintf(stderr, "read in %d SNPs (eQTL+gwas), %d GWAS loci, %.1f expected hits\n\n", int(snp_vec.size()), int(gwas_vec.size()), gwas_sum);
-
-    P_gwas = gwas_sum/snp_vec.size();
+    // fprintf(stderr, "%d  %d    %7.3e  %f\n", gwas_count, total_snp, pi1, gwas_sum);
+    P_gwas = gwas_sum/total_snp;
 
 }
 
@@ -264,10 +269,10 @@ void controller::enrich_est(){
     fprintf(fd, "%10s   %7.3f     %7.3f\n","Enrichment", a1_est, sd1);
 
     fclose(fd);
+    set_enrich_params(a0_est, a1_est);
 
-    pi1_e = exp(a0_est+a1_est)/(1+exp(a0_est + a1_est));
-    pi1_ne =  exp(a0_est)/(1+exp(a0_est));
-
+    //pi1_e = exp(a0_est+a1_est)/(1+exp(a0_est + a1_est));
+    //pi1_ne =  exp(a0_est)/(1+exp(a0_est));
     //printf("%7.3e  %7.3e     %7.3e\n", pi1_e, pi1_ne, pi1);
 
     fprintf(stderr, "\nEnrichment analysis is completed\n");
@@ -278,6 +283,27 @@ void controller::enrich_est(){
 }
 
 
+
+void controller::set_enrich_params(double a0, double a1){
+    
+    pi1_e = exp(a0+a1)/(1+exp(a0 + a1));
+    pi1_ne =  exp(a0)/(1+exp(a0));
+
+}
+
+
+
+
+void controller::set_enrich_params(double p1, double p2, double p12){
+
+    double a0 = log(p1/(1-p1-p2-p12));
+    double a1 = log(p12*(1-p1-p2-p12)/(p1*p2));
+    fprintf(stderr, "converting enrichment parameters: \n");
+    fprintf(stderr, "%10s   %7.3f\n","Intercept", a0);
+    fprintf(stderr, "%10s   %7.3f\n\n","Enrichment", a1);
+
+    set_enrich_params(a0,a1);
+}
 
 
 void controller::compute_coloc_prob(){
@@ -413,7 +439,8 @@ vector<double> controller::run_EM(vector<int> &eqtl_sample){
             }
 
         }
-
+        
+        e0g0 += total_snp-(e0g0+e0g1+e1g0+e1g1);
         // M-step
 
         double a1_new = log(e1g1*e0g0/(e1g0*e0g1));

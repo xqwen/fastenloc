@@ -23,6 +23,8 @@ class controller {
         int ImpN;
         int nthread;
         
+        int total_snp;
+
         double pi1;
         double pi1_e;
         double pi1_ne;
@@ -43,6 +45,10 @@ class controller {
             ImpN = imp;
         }
 
+        void set_snp_size(int size){
+            total_snp = size;
+        }
+
         void set_pseudo_count (double pc){
             pseudo_count = pc;
         }
@@ -53,6 +59,9 @@ class controller {
 
         void set_prefix(char *str);
         
+        void set_enrich_params(double p1, double p2, double p12);
+        void set_enrich_params(double a0, double a1);
+
         void load_eqtl(char *eqtl_file, char *tissue);
         void load_gwas_torus(char *gwas_file);
 
