@@ -50,8 +50,8 @@ void controller::load_eqtl(char *eqtl_file, char *tissue){
             string token;
 
 
-
-            while ((pos = content.find(delim)) != string::npos) {
+            do{
+                pos = content.find(delim);
                 token = content.substr(0, pos);
                 size_t pos1 = token.find("@");
                 size_t pos2 = token.find("=");
@@ -62,7 +62,7 @@ void controller::load_eqtl(char *eqtl_file, char *tissue){
                 if(pos1 != string::npos && pos2-pos1>1){
                     tissue_type = token.substr(pos1+1,pos2-pos1-1);
                 }
-                
+
                 sig_id = token.substr(0,pos1);
 
                 //printf("sig id = %s %d %d\n",sig_id.c_str(),pos2,pos1);
@@ -72,7 +72,7 @@ void controller::load_eqtl(char *eqtl_file, char *tissue){
 
                 if(strlen(tissue)==0 || tissue_type.compare(target_tissue)==0){    
 
-                   if(snp_index.find(snp_id) == snp_index.end()){
+                    if(snp_index.find(snp_id) == snp_index.end()){
                         snp_index[snp_id] = snp_vec.size();
                         snp_vec.push_back(snp_id);
                     }
@@ -97,7 +97,7 @@ void controller::load_eqtl(char *eqtl_file, char *tissue){
 
 
                 content.erase(0, pos + delim.length());
-            }
+            }while(pos != string::npos);
         }
 
     }
@@ -107,12 +107,8 @@ void controller::load_eqtl(char *eqtl_file, char *tissue){
     }
 
     fprintf(stderr, "read in %d SNPs, %d eQTL signal clusters, %.1f expected eQTLs\n\n", int(snp_vec.size()), int(eqtl_vec.size()), sum);
-    
-    if(total_snp == 0)
-        total_snp = snp_vec.size();
-    
 
-    P_eqtl = sum/total_snp;
+    P_eqtl = sum;
     // fprintf(stderr, "%d  %d    %7.3e  %f\n", int(snp_vec.size()), total_snp, P_eqtl, sum);
 }
 
@@ -179,14 +175,17 @@ void controller::load_gwas_torus(char *gwas_file){
             gwas_pip_vec[snp_index[snp]]=gwas_vec[i].pip_vec[j];
         }
     }
+
     
-    if(total_snp == 0)
-        total_snp = gwas_count;
+    if(total_snp < snp_vec.size())
+        total_snp = snp_vec.size();
+
     pi1 = gwas_sum/total_snp; 
 
     fprintf(stderr, "read in %d SNPs (eQTL+gwas), %d GWAS loci, %.1f expected hits\n\n", int(snp_vec.size()), int(gwas_vec.size()), gwas_sum);
     // fprintf(stderr, "%d  %d    %7.3e  %f\n", gwas_count, total_snp, pi1, gwas_sum);
     P_gwas = gwas_sum/total_snp;
+    P_eqtl = P_eqtl/total_snp;
 
 }
 
@@ -205,9 +204,9 @@ void controller::enrich_est(){
     vector<double> a1_vec = vector<double>(ImpN, 0.0);
     vector<double> v1_vec = vector<double>(ImpN, 0.0);
 
-    #pragma omp parallel for num_threads(nthread)
+#pragma omp parallel for num_threads(nthread)
     for(int k=0; k< ImpN; k++){
-   
+
         vector<int> eqtl_sample = vector<int>(snp_vec.size(),0);
 
         for(int i=0; i<eqtl_vec.size();i++){
@@ -219,7 +218,7 @@ void controller::enrich_est(){
         }
 
         vector<double> rst = run_EM(eqtl_sample);
-        #pragma omp critical
+#pragma omp critical
         {
             a0_vec[k] = rst[0];
             a1_vec[k] = rst[1];
@@ -230,8 +229,8 @@ void controller::enrich_est(){
         fprintf(stderr, "Imputation round %2d is completed\n", k+1);
     }
 
-   a0_est = 0;
-   a1_est = 0;
+    a0_est = 0;
+    a1_est = 0;
 
     double var0 = 0;
     double var1 = 0;
@@ -264,7 +263,7 @@ void controller::enrich_est(){
     double sd1 = sqrt(var1 + bv1*(ImpN+1)/ImpN);
     string  enrich_file = prefix + string("enloc.enrich.out");
     FILE *fd = fopen(enrich_file.c_str(), "w");
-    
+
     fprintf(fd, "%10s   %7.3f     %7.3f\n","Intercept", a0_est, sd0);
     fprintf(fd, "%10s   %7.3f     %7.3f\n","Enrichment", a1_est, sd1);
 
@@ -285,7 +284,7 @@ void controller::enrich_est(){
 
 
 void controller::set_enrich_params(double a0, double a1){
-    
+
     pi1_e = exp(a0+a1)/(1+exp(a0 + a1));
     pi1_ne =  exp(a0)/(1+exp(a0));
 
@@ -309,12 +308,12 @@ void controller::set_enrich_params(double p1, double p2, double p12){
 void controller::compute_coloc_prob(){
 
     fprintf(stderr, "\nComputing colocalization probabilities ... \n\n");
- 
+
     string snp_file = prefix + string("enloc.snp.out");
     string sig_file = prefix + string("enloc.sig.out");
     FILE * fd1 = fopen(snp_file.c_str(),"w");
     FILE * fd2 = fopen(sig_file.c_str(),"w");
-    
+
     double r_null = pi1/(1-pi1);
     double r1 = pi1_e/(1-pi1_e);
     double r0 = pi1_ne/(1-pi1_ne);
@@ -341,7 +340,7 @@ void controller::compute_coloc_prob(){
 
             gprob_null = 1-1e-5;
         }
-        
+
         double nc = ((1-pi1)/pi1)/(1-gprob_null);
         double sum_bf = nc - (1-pi1)/pi1;
         vector<double> bf_vec;
@@ -364,22 +363,22 @@ void controller::compute_coloc_prob(){
             eqtl_vec[i].coloc_prob += p_coloc;
 
             //other non-coloc possibilities
-           // no eqtl, k-th SNP is the gwas hit
-           prob = bf_vec[k]/((1-pi1_ne)/pi1_ne + sum_bf);   
-           gprob_e += prob*(1-eqtl_vec[i].cpip);
+            // no eqtl, k-th SNP is the gwas hit
+            prob = bf_vec[k]/((1-pi1_ne)/pi1_ne + sum_bf);   
+            gprob_e += prob*(1-eqtl_vec[i].cpip);
 
-           // j-th SNP is the eQTL, and k-th SNP is the GWAS 
-           for(int j=0;j<eqtl_vec[i].snp_vec.size();j++){
-               if(j==k)
-                   continue;
-               prob = pi1_ne*(1-pi1_e)*bf_vec[k]/( (1-pi1_e)*(1-pi1_ne) + pi1_ne*(1-pi1_e)*(sum_bf-bf_vec[j])+pi1_e*(1-pi1_ne)*bf_vec[j]);
-               gprob_e += prob* eqtl_vec[i].pip_vec[j];
-           }
-           
-           fprintf(fd1,"%15s   %15s   %7.3e %7.3e    %7.3e      %7.3e\n",eqtl_vec[i].id.c_str(), snp.c_str(), r,d, gprob_e,  p_coloc);
-           gwas_cpip += gprob_e; 
+            // j-th SNP is the eQTL, and k-th SNP is the GWAS 
+            for(int j=0;j<eqtl_vec[i].snp_vec.size();j++){
+                if(j==k)
+                    continue;
+                prob = pi1_ne*(1-pi1_e)*bf_vec[k]/( (1-pi1_e)*(1-pi1_ne) + pi1_ne*(1-pi1_e)*(sum_bf-bf_vec[j])+pi1_e*(1-pi1_ne)*bf_vec[j]);
+                gprob_e += prob* eqtl_vec[i].pip_vec[j];
+            }
+
+            fprintf(fd1,"%15s   %15s   %7.3e %7.3e    %7.3e      %7.3e\n",eqtl_vec[i].id.c_str(), snp.c_str(), r,d, gprob_e,  p_coloc);
+            gwas_cpip += gprob_e; 
         }
-            
+
 
         fprintf(fd2, "%15s   %4d  %7.3e %7.3e    %7.3e      %7.3e\n",eqtl_vec[i].id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_null, gwas_cpip, eqtl_vec[i].coloc_prob);
 
@@ -401,7 +400,7 @@ vector<double> controller::run_EM(vector<int> &eqtl_sample){
     double r0 = exp(a0);
     double r_null = pi1/(1-pi1);
 
-    
+
 
 
     while(1){
@@ -439,7 +438,7 @@ vector<double> controller::run_EM(vector<int> &eqtl_sample){
             }
 
         }
-        
+
         e0g0 += total_snp-(e0g0+e0g1+e1g0+e1g1);
         // M-step
 

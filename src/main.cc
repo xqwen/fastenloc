@@ -54,7 +54,7 @@ int main(int argc, char **argv){
         }
 
 
-        if(strcmp(argv[i], "-p")==0){
+        if(strcmp(argv[i], "-total_variant")==0){
             total_snp = atoi(argv[++i]);
             continue;
         }

@@ -28,7 +28,7 @@ The PIP can be generated from any Bayesian fine-mapping algorithms (DAP-G, CAVIA
 Command line syntax
 
 ```
-fastenloc -e eqtl_annotation_gzipped -g gwas_data_gzipped -t tissue_name [-thread n] [-prefix prefix_name]
+fastenloc -e eqtl_annotation_gzipped -g gwas_data_gzipped -t tissue_name [-thread n] [-prefix prefix_name] [-total_variant total_snp] [-pc pseudo_count] 
 ```
 For example to run colocalization analysis of Height GWAS and whole blood eQTLs, run
 
