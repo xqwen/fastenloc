@@ -1,11 +1,11 @@
 # fastENLOC: fast enrichment estimation aided colocalization analysis
 
 
-This repository contains the software implementation of fastENLOC, which enables integrative genetic association analysis of molecular QTL data and GWAS data. The statistical model and the key computational procedures are described in [1] and [2]. Compared to the previous implementation of [ENLOC](https://github.com/xqwen/integrative), the new implementation is a standalone C++ program and runs magnitude faster.    
+This repository contains the software implementation of fastENLOC, which enables integrative genetic association analysis of molecular QTL data and GWAS data. The statistical model and the key computational procedures are described in \[[1](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646)\] and \[[2](https://biorxiv.org/)\]. Compared to the previous implementation of [ENLOC](https://github.com/xqwen/integrative), the new implementation is a standalone C++ program and runs magnitude faster.    
 
 For questions/comments regarding to the software package, please contact Xiaoquan Wen (xwen at umich dot edu).
 
-# License
+## License
 
 Software distributed under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](http://www.gnu.org/licenses/gpl-3.0.en.html) for more details.
 
@@ -31,5 +31,5 @@ If you prefer to using newly released GTEx v8 eQTL annotation for analysis, plea
 
 ## Citation
 
-+ Wen, X., Pique-Regi, R., Luca, F. Integrating Molecular QTL Data into Genome-wide Genetic Association Analysis: Probabilistic Assessment of Enrichment and Colocalization. *PLOS Genetics*. 2017 Mar 13(3): e1006646.
-+ Pividori and Rajagopal et al. PhenomeXcan: Mapping the genome to the phenome through the transcriptome. *BioRxiv* 2019
+1. Wen, X., Pique-Regi, R., Luca, F. Integrating Molecular QTL Data into Genome-wide Genetic Association Analysis: Probabilistic Assessment of Enrichment and Colocalization. *PLOS Genetics*. 2017 Mar 13(3): e1006646.
+2. Pividori and Rajagopal et al. PhenomeXcan: Mapping the genome to the phenome through the transcriptome. *BioRxiv* 2019
