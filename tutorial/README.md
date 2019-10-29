@@ -1,6 +1,6 @@
 # fastENLOC User's Guide
 
-To run fastENLOC, one needs to prepare probabilistic eQTL annotations generated from software package ``[DAP-G](https://github.com/xqwen/dap/)`` and posterior probabilities from analyzing GWAS data. This document illustrates the details on each step.
+To run fastENLOC, one needs to prepare probabilistic eQTL annotations generated from software package [``DAP-G``](https://github.com/xqwen/dap/) and posterior probabilities from analyzing GWAS data. This document illustrates the details on each step.
 
 
 ## 1. Preparing probabilistic eQTL annotation
@@ -98,7 +98,7 @@ Required:
 
 Recommended:
 
-+ ``-total_varaints``: specify the number of total SNPs interrogated. This option is important if GWAS or eQTL file does not contain all SNPs interrogated. 
++ ``-total_variants``: specify the number of total SNPs interrogated. This option is important if GWAS or eQTL file does not contain all SNPs interrogated. 
 
 Optional:
 
