@@ -7,19 +7,18 @@ For questions/comments regarding to the software package, please contact Xiaoqua
 
 # License
 
-Software distributed under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](http://www.gnu.org/licenses/gpl-3
-.0.en.html) for more details.
+Software distributed under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](http://www.gnu.org/licenses/gpl-3.0.en.html) for more details.
 
 
 ## Tutorial and guideline
 
-A detailed tutorial is provided in [``tutorial``](https://https://github.com/xqwen/fastenloc/tree/master/tutorial/) directory. Briefly, three main steps are required for a complete analysis
+A detailed tutorial is provided in [``tutorial``](https://github.com/xqwen/fastenloc/tree/master/tutorial/) directory. Briefly, three main steps are required for a complete analysis
 
 1. Prepare eQTL annotation
 2. Prepare GWAS sumary (in term of posterior inclusion probabilities, or PIPs)
 3. Run fastenloc
 
-We distribute pre-computed eQTL annotations from GTEx (v8) data. In the simplest case, the required GWAS PIPs can be computed from single-SNP association summary-statistics (e.g., z-scores and p-values). 
+We distribute pre-computed eQTL annotations from GTEx (v8) data. In the simplest case, the required GWAS PIPs can be computed from single-SNP association summary-statistics (e.g., z-scores and p-values) using [``torus``](https://github.com/xqwen/torus/) 
 
 
 ## GTEx v8 multi-tissue eQTL annotations for fastENLOC
