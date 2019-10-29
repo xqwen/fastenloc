@@ -1,3 +1,5 @@
+## Compile the source code
+
 Run ``make`` to compile the source code in this directory. The resulting executable is named ``fastenloc``.
 
 ## Sample data download
@@ -54,4 +56,6 @@ fastenloc -e gtex_v8.eqtl_annot.vcf.gz -g Height.gwas.pip -t Whole_Blood -prefix
     + column 5: SNP-level PIP of GWAS (with eQTL prior)
     + column 6: SNP-level colocalization probability
 
+
+For more detailed instructions, please refer to the [tutorial](../tutorial/).
 
