@@ -9,14 +9,13 @@ To run fastENLOC, one needs to prepare probabilistic eQTL annotations generated 
 
 Simply download appropriate vcf files below. Note that the variant IDs have to match in the GWAS and eQTL annotations. 
 
-+  [Multi-tissue eQTL annotation with hg38 position ID](https://drive.google.com/open?id=1kfH_CffxyCtZcx3z7k63rIARNi
-dLv1_P)
++  [Multi-tissue eQTL annotation with hg38 position ID](https://drive.google.com/open?id=1kfH_CffxyCtZcx3z7k63rIARNidLv1_P)
 +  [Multi-tissue eQTL annotation with rs ID](https://drive.google.com/open?id=1rSaHenk8xOFtQo7VuDZevRkjUz6iwuj0)
 
 
 ### Derive annotations based on your own eQTL data
 
-The required annotations can be obtained from Bayeisan multi-SNP fine-mapping analysis using software package [``DAP``](https://github.com/xqwen/dap/). This [document](https://github.com/xqwen/dap/gtex_v8_analysis) provides a summary on the processing of GTEx v8 data. 
+The required annotations can be obtained from Bayeisan multi-SNP fine-mapping analysis using software package [``DAP``](https://github.com/xqwen/dap/). This [document](https://github.com/xqwen/dap/tree/master/gtex_v8_analysis) provides a summary on the processing of GTEx v8 data. 
 
 Once the fine-mapping by DAP is completed
 
