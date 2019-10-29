@@ -4,7 +4,7 @@ Run ``make`` to compile the source code in this directory. The resulting executa
 
 ## Sample data download
 
-+ GTEx v8 eQTL annotation: [download](https://drive.google.com/open?id=1kfH_CffxyCtZcx3z7k63rIARNidLv1_P) [with rs ID](https://drive.google.com/open?id=1rSaHenk8xOFtQo7VuDZevRkjUz6iwuj0)
++ GTEx v8 eQTL annotation: [\[with hg38 position ID\]](https://drive.google.com/open?id=1kfH_CffxyCtZcx3z7k63rIARNidLv1_P)    [\[with rs ID\]](https://drive.google.com/open?id=1rSaHenk8xOFtQo7VuDZevRkjUz6iwuj0)
 + Height GWAS z-scores in torus format: [download](https://drive.google.com/open?id=1kxZge6NQ8_8oJjVhkO4lKdmZiG2jbu1m)
 + Processing GWAS data with ``torus``
 
