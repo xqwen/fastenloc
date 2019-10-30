@@ -61,9 +61,9 @@ sub process_fm{
     while(<FILE>){
         my @data = split /\s+/, $_;
         shift @data until $data[0]=~/^\S/;
-        next if $data[-1] == -1;
+        next if $data[4] == -1;
         next if $data[2] < 1e-4;
-        my $info = "$gene:$data[-1]\@$tissue\=$data[2]".$cluster{$data[-1]};
+        my $info = "$gene:$data[4]\@$tissue\=$data[2]".$cluster{$data[4]};
         if(!defined($snp{$data[1]})){
             $data[1] =~ /chr(\S+)\_(\d+)\_(\S+)\_(\S+)\_b38/;
             $map{$1}->{$2} = $data[1];
