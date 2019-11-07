@@ -1,7 +1,7 @@
 # fastENLOC: fast enrichment estimation aided colocalization analysis
 
 
-This repository contains the software implementation of fastENLOC, which enables integrative genetic association analysis of molecular QTL data and GWAS data. The statistical model and the key computational procedures are described in \[[1](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646)\] and \[[2](https://biorxiv.org/)\]. Compared to the previous implementation of [ENLOC](https://github.com/xqwen/integrative), the new implementation is a standalone C++ program and runs magnitude faster.    
+This repository contains the software implementation of fastENLOC, which enables integrative genetic association analysis of molecular QTL data and GWAS data. The statistical model and the key computational procedures are described in \[[1](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646)\] and \[[2](https://www.biorxiv.org/content/10.1101/833210v1)\]. Compared to the previous implementation of [ENLOC](https://github.com/xqwen/integrative), the new implementation is a standalone C++ program and runs magnitude faster.    
 
 For questions/comments regarding to the software package, please contact Xiaoquan Wen (xwen at umich dot edu).
 
@@ -32,4 +32,4 @@ If you prefer to using newly released GTEx v8 eQTL annotation for analysis, plea
 ## Citation
 
 1. Wen, X., Pique-Regi, R., Luca, F. Integrating Molecular QTL Data into Genome-wide Genetic Association Analysis: Probabilistic Assessment of Enrichment and Colocalization. *PLOS Genetics*. 2017 Mar 13(3): e1006646.
-2. Pividori and Rajagopal et al. PhenomeXcan: Mapping the genome to the phenome through the transcriptome. *BioRxiv* 2019
+2. Pividori and Rajagopal et al. PhenomeXcan: Mapping the genome to the phenome through the transcriptome. *BioRxiv* 2019: doi: 10.1101/833210
