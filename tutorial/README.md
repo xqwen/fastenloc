@@ -1,4 +1,4 @@
-# fastENLOC User's Guide
+# fastENLOe User's Guide
 
 To run fastENLOC, one needs to prepare probabilistic eQTL annotations generated from software package [``DAP-G``](https://github.com/xqwen/dap/) and posterior probabilities from analyzing GWAS data. This document illustrates the details on each step.
 
@@ -60,8 +60,7 @@ The minimum requirement for GWAS data are single-SNP testing summary statistics,
     chr1_17407_G_A_b38  Loc1  0.004952064233334381
 ```
 The first and second columns represent the ID the LD block of the corresponding SNP, respectively. The last column i
-ndicates the z-scores. The LD blocks are defined based on the results of [Berisa and Pickrell, 2015](http://bioinformatics.oxfordjournals.org/content/32/2/283). The segmentation of the LD blocks are population-specific, the detailed
- information can be found [here](https://bitbucket.org/nygcresearch/ldetect-data).
+ndicates the z-scores. The LD blocks are defined based on the results of [Berisa and Pickrell, 2015](http://bioinformatics.oxfordjournals.org/content/32/2/283). The segmentation of the LD blocks are population-specific, the detailed information can be found [here](https://bitbucket.org/nygcresearch/ldetect-data). Here, we also provide an [European-based LD definition file](eur_ld.hg38.bed) using the hg38 coordinates.
 
 For reference, we provide a complete sample data from [Height GWAS](https://drive.google.com/open?id=1kxZge6NQ8_8oJjVhkO4lKdmZiG2jbu1m). The data set is orignially from UK Biobank with additional SNPs imputed to match the GTEx SNP panel.
 
