@@ -33,7 +33,7 @@ class controller {
         double a1_est;
         
         // for enrichment prior
-        double pseudo_count;
+        double prior_variance;
         double P_eqtl;
         double P_gwas;
 
@@ -49,8 +49,8 @@ class controller {
             total_snp = size;
         }
 
-        void set_pseudo_count (double pc){
-            pseudo_count = pc;
+        void set_prior_variance (double pv){
+            prior_variance = pv;
         }
 
         void set_thread(int thread){

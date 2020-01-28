@@ -264,8 +264,16 @@ void controller::enrich_est(){
     string  enrich_file = prefix + string("enloc.enrich.out");
     FILE *fd = fopen(enrich_file.c_str(), "w");
 
-    fprintf(fd, "%10s   %7.3f     %7.3f\n","Intercept", a0_est, sd0);
-    fprintf(fd, "%10s   %7.3f     %7.3f\n","Enrichment", a1_est, sd1);
+    fprintf(fd, "%25s   %7.3f     %7.3f\n","Intercept", a0_est, sd0);
+    fprintf(fd, "%25s   %7.3f     %7.3f\n","Enrichment (likelihood)", a1_est, sd1);
+    
+    // apply shrinkage
+    if(prior_variance > 0){
+        double post_var = 1.0/(1.0/prior_variance + 1/(sd1*sd1));
+        double post_est = (a1_est*prior_variance)/(prior_variance + sd1*sd1); 
+        a1_est = post_est;
+        fprintf(fd, "%25s   %7.3f     %7.3f\n","Enrichment (shrinkage)", a1_est, sqrt(post_var));
+    }
 
     fclose(fd);
     set_enrich_params(a0_est, a1_est);
@@ -375,12 +383,13 @@ void controller::compute_coloc_prob(){
                 gprob_e += prob* eqtl_vec[i].pip_vec[j];
             }
 
-            fprintf(fd1,"%15s   %15s   %7.3e %7.3e    %7.3e      %7.3e\n",eqtl_vec[i].id.c_str(), snp.c_str(), r,d, gprob_e,  p_coloc);
+            if(p_coloc>1e-4)
+                fprintf(fd1,"%15s   %15s   %7.3e %7.3e    %7.3e      %7.3e\n",eqtl_vec[i].id.c_str(), snp.c_str(), r,d, gprob_e,  p_coloc);
             gwas_cpip += gprob_e; 
         }
 
-
-        fprintf(fd2, "%15s   %4d  %7.3e %7.3e    %7.3e      %7.3e\n",eqtl_vec[i].id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_null, gwas_cpip, eqtl_vec[i].coloc_prob);
+        if(eqtl_vec[i].coloc_prob>1e-4)
+            fprintf(fd2, "%15s   %4d  %7.3e %7.3e    %7.3e      %7.3e\n",eqtl_vec[i].id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_null, gwas_cpip, eqtl_vec[i].coloc_prob);
 
     }
 
@@ -404,18 +413,16 @@ vector<double> controller::run_EM(vector<int> &eqtl_sample){
 
 
     while(1){
-        /*
         // E-step
-        double e0g0 = 0;
-        double e0g1 = 0;
-        double e1g0 = 0;
-        double e1g1 = 0;
-        */
-        // pseudo count/ shrinkage 
+        double pseudo_count = 1.0;
         double e0g0 = pseudo_count*(1-P_gwas)*(1-P_eqtl);
         double e0g1 = pseudo_count*(1-P_eqtl)*P_gwas;;
         double e1g0 = pseudo_count*(1-P_gwas)*P_eqtl;;
         double e1g1 = pseudo_count*P_gwas*P_eqtl;;
+
+
+
+
 
         for(int i=0;i<snp_vec.size();i++){
 
@@ -440,13 +447,13 @@ vector<double> controller::run_EM(vector<int> &eqtl_sample){
         }
 
         e0g0 += total_snp-(e0g0+e0g1+e1g0+e1g1);
-        // M-step
+
 
         double a1_new = log(e1g1*e0g0/(e1g0*e0g1));
         if(fabs(a1_new-a1)<0.01){
             a1 = a1_new;
-            var1 = 1.0/e0g0 + 1.0/e1g0 + 1.0/e1g1 + 1.0/e0g1;
-            var0 = sqrt(1.0/e0g1 + 1.0/e0g0);
+            var1 = (1.0/e0g0 + 1.0/e1g0 + 1.0/e1g1 + 1.0/e0g1);
+            var0 = (1.0/e0g1 + 1.0/e0g0);
             break;
         }
 

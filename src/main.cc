@@ -32,7 +32,7 @@ int main(int argc, char **argv){
 
     int ImpN = 25;
     int nthread = 1;
-    double pc = 1;
+    double shrinkage = -1;
 
     int total_snp = 0;
 
@@ -65,8 +65,8 @@ int main(int argc, char **argv){
             continue;
         }
 
-        if(strcmp(argv[i], "-pc")==0 || strcmp(argv[i], "-pseudo_count")==0){
-            pc = atof(argv[++i]);
+        if(strcmp(argv[i], "-shrinkage")==0 || strcmp(argv[i], "-s")==0){
+            shrinkage = atof(argv[++i]);
             continue;
         }
 
@@ -118,7 +118,19 @@ int main(int argc, char **argv){
     con.set_snp_size(total_snp);
     con.set_thread(nthread);
     con.set_prefix(prefix);
-    con.set_pseudo_count(pc);
+    
+    // default shrinkage
+    double pv = 1;
+    // no shrinkage
+    if(shrinkage == 0){
+        pv = -1;
+    }
+    // user-spcified valid shrinkage: 1/prior_variance
+    if(shrinkage >0){
+        pv = 1/shrinkage;
+    }
+        
+    con.set_prior_variance(pv);
     
 
 
