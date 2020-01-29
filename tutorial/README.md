@@ -86,7 +86,7 @@ We highly recommend to perform multi-SNP fine-mapping analysis on your GWAS data
 
 The command line syntax to run fastENLOC is 
 ```
-fastenloc -eqtl eqtl_annotation_gzipped -gwas gwas_data_gzipped [-total_variants total_snp] [-t tissue_name] [-thread n] [-prefix prefix_name] [-pc pseudo_count]
+fastenloc -eqtl eqtl_annotation_gzipped -gwas gwas_data_gzipped [-total_variants total_snp] [-t tissue_name] [-thread n] [-prefix prefix_name] [-s shrinkage]
 ```
 
 Required:
@@ -101,8 +101,8 @@ Recommended:
 
 Optional:
 
++ ``-s``: shrinkage parameter, similar to the shrinkage parameter used in ridge regression. It takes any non-negative value and shrinks the enrichment esitmate towards 0.. When it is set to 0, no shrinkage will be applied. A large value indicates strong shrinkage. The default value is set to 1.0.
 + ``-thread``: number of parallel threads for analysis. By default, a single thread is used
-+ ``-pc``: specify the shrinkage prior/pseudo count in the enrichment analysis. By default, pc = 1. increase pc values if the enrichment estimates have large estimated variance. 
 + ``-prefix``: specify the prefix for the output files.
 
 
