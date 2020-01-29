@@ -30,7 +30,7 @@ The PIP can be generated from any Bayesian fine-mapping algorithms (DAP-G, CAVIA
 Command line syntax
 
 ```
-fastenloc -e eqtl_annotation_gzipped -g gwas_data_gzipped -t tissue_name [-thread n] [-prefix prefix_name] [-total_variant total_snp] [-pc pseudo_count] 
+fastenloc -e eqtl_annotation_gzipped -g gwas_data_gzipped -t tissue_name [-thread n] [-prefix prefix_name] [-total_variant total_snp] [-s shrinkage] 
 ```
 For example to run colocalization analysis of Height GWAS and whole blood eQTLs, run
 
@@ -40,7 +40,7 @@ fastenloc -e gtex_v8.eqtl_annot.vcf.gz -g Height.gwas.pip -t Whole_Blood -prefix
 
 ## Output
 
-1. Enrichment analysis result ``prefix.enloc.enrich.rst``: estimated enrichment parameters and standard errors.
+1. Enrichment analysis result ``prefix.enloc.enrich.rst``: estimated enrichment parameters and standard errors. If shrinkage parameter is non-zero, both the unshrunk and the shrunk enrichment estimates will be output. Note that, only the shrunk estimate will be used in the colocalization computation.
 2. Signal-level colocalization result ``prefix.enloc.sig.out``:  the main output from the colocalization analysis with the following format
     + column 1: signal cluster name (from eQTL analysis)
     + column 2: number of member SNPs
