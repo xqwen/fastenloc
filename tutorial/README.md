@@ -101,7 +101,7 @@ Recommended:
 
 Optional:
 
-+ ``-s``: shrinkage parameter, similar to the shrinkage parameter used in ridge regression. It takes any non-negative value and shrinks the enrichment esitmate towards 0.. When it is set to 0, no shrinkage will be applied. A large value indicates strong shrinkage. The default value is set to 1.0.
++ ``-s``: shrinkage parameter, similar to the shrinkage parameter used in ridge regression. It takes any non-negative value and shrinks the enrichment esitmate towards 0. When it is set to 0, no shrinkage will be applied. A large value indicates strong shrinkage. The default value is set to 1.0.
 + ``-thread``: number of parallel threads for analysis. By default, a single thread is used
 + ``-prefix``: specify the prefix for the output files.
 
