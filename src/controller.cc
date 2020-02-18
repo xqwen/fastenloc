@@ -265,14 +265,14 @@ void controller::enrich_est(){
     FILE *fd = fopen(enrich_file.c_str(), "w");
 
     fprintf(fd, "%25s   %7.3f     %7.3f\n","Intercept", a0_est, sd0);
-    fprintf(fd, "%25s   %7.3f     %7.3f\n","Enrichment (likelihood)", a1_est, sd1);
+    fprintf(fd, "%25s   %7.3f     %7.3f\n","Enrichment (no shrinkage)", a1_est, sd1);
     
     // apply shrinkage
     if(prior_variance > 0){
         double post_var = 1.0/(1.0/prior_variance + 1/(sd1*sd1));
         double post_est = (a1_est*prior_variance)/(prior_variance + sd1*sd1); 
         a1_est = post_est;
-        fprintf(fd, "%25s   %7.3f     %7.3f\n","Enrichment (shrinkage)", a1_est, sqrt(post_var));
+        fprintf(fd, "%25s   %7.3f     %7.3f\n","Enrichment (w/ shrinkage)", a1_est, sqrt(post_var));
     }
 
     fclose(fd);
@@ -383,12 +383,12 @@ void controller::compute_coloc_prob(){
                 gprob_e += prob* eqtl_vec[i].pip_vec[j];
             }
 
-            if(p_coloc>1e-4)
+            if(p_coloc>output_thresh)
                 fprintf(fd1,"%15s   %15s   %7.3e %7.3e    %7.3e      %7.3e\n",eqtl_vec[i].id.c_str(), snp.c_str(), r,d, gprob_e,  p_coloc);
             gwas_cpip += gprob_e; 
         }
 
-        if(eqtl_vec[i].coloc_prob>1e-4)
+        if(eqtl_vec[i].coloc_prob>output_thresh)
             fprintf(fd2, "%15s   %4d  %7.3e %7.3e    %7.3e      %7.3e\n",eqtl_vec[i].id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_null, gwas_cpip, eqtl_vec[i].coloc_prob);
 
     }

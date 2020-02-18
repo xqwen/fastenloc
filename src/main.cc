@@ -30,6 +30,8 @@ int main(int argc, char **argv){
     double p2 = UNDEF;
     double p12 = UNDEF;
 
+    double output_thresh = 1e-4;
+
     int ImpN = 25;
     int nthread = 1;
     double shrinkage = -1;
@@ -103,7 +105,11 @@ int main(int argc, char **argv){
             strcpy(prefix,argv[++i]);
             continue;
         }
-
+        
+        if(strcmp(argv[i], "--all")==0 || strcmp(argv[i], "--output_all")==0){
+            output_thresh = 0;
+            continue;
+        }
 
         fprintf(stderr,"Error: unknown command option \'%s\'\n", argv[i]); 
         continue;
@@ -118,7 +124,8 @@ int main(int argc, char **argv){
     con.set_snp_size(total_snp);
     con.set_thread(nthread);
     con.set_prefix(prefix);
-    
+    con.set_output_thresh(output_thresh);
+
     // default shrinkage
     double pv = 1;
     // no shrinkage

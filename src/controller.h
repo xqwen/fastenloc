@@ -37,6 +37,8 @@ class controller {
         double P_eqtl;
         double P_gwas;
 
+        // threshold value to output signal/snp coloc probs
+        double output_thresh;
 
 
     public:
@@ -64,6 +66,11 @@ class controller {
 
         void load_eqtl(char *eqtl_file, char *tissue);
         void load_gwas_torus(char *gwas_file);
+
+
+        void set_output_thresh(double value){
+            output_thresh = value;
+        }
 
         void enrich_est();
         void compute_coloc_prob();
