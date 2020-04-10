@@ -1,4 +1,4 @@
-# fastENLOe User's Guide
+# fastENLOC User's Guide
 
 To run fastENLOC, one needs to prepare probabilistic eQTL annotations generated from software package [``DAP-G``](https://github.com/xqwen/dap/) and posterior probabilities from analyzing GWAS data. This document illustrates the details on each step.
 
