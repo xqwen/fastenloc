@@ -321,6 +321,10 @@ void controller::compute_coloc_prob(){
     string sig_file = prefix + string("enloc.sig.out");
     FILE * fd1 = fopen(snp_file.c_str(),"w");
     FILE * fd2 = fopen(sig_file.c_str(),"w");
+    
+    fprintf(fd1, "Signal\tSNP\tPIP_qtl\tPIP_gwas_marginal\tPIP_gwas_qtl_prior\tSCP\n");
+    fprintf(fd2, "Signal\tNum_SNP\tCPIP_qtl\tCPIP_gwas_marginal\tCPIP_gwas_qtl_prior\tRCP\n");
+
 
     double r_null = pi1/(1-pi1);
     double r1 = pi1_e/(1-pi1_e);
@@ -383,12 +387,12 @@ void controller::compute_coloc_prob(){
                 gprob_e += prob* eqtl_vec[i].pip_vec[j];
             }
 
-            if(p_coloc>output_thresh)
+            if(p_coloc>=output_thresh)
                 fprintf(fd1,"%15s   %15s   %7.3e %7.3e    %7.3e      %7.3e\n",eqtl_vec[i].id.c_str(), snp.c_str(), r,d, gprob_e,  p_coloc);
             gwas_cpip += gprob_e; 
         }
 
-        if(eqtl_vec[i].coloc_prob>output_thresh)
+        if(eqtl_vec[i].coloc_prob>=output_thresh)
             fprintf(fd2, "%15s   %4d  %7.3e %7.3e    %7.3e      %7.3e\n",eqtl_vec[i].id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_null, gwas_cpip, eqtl_vec[i].coloc_prob);
 
     }
