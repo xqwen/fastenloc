@@ -3,7 +3,7 @@
 
 This repository contains the software implementation of fastENLOC, which enables integrative genetic association analysis of molecular QTL data and GWAS data. The statistical model and the key computational procedures are described in \[[1](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006646)\] and \[[2](https://www.biorxiv.org/content/10.1101/833210v1)\]. Compared to the previous implementation of [ENLOC](https://github.com/xqwen/integrative), the new implementation is a standalone C++ program and runs magnitude faster.    
 
-For questions/comments regarding to the software package, please contact Xiaoquan Wen (xwen at umich dot edu).
+For questions/comments regarding to the software package, please contact Xiaoquan (William) Wen (xwen at umich dot edu).
 
 ## License
 
