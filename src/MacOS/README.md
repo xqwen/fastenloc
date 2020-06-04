@@ -17,7 +17,7 @@ brew install boost
 brew install llvm
 brew install libomp
 ```
-5. Replace ``Makefile`` in the ``src`` directory with ``Makefile.MacOS`` provided in this directory and run 
+5. Replace ``Makefile`` in ``src`` with ``Makefile.MacOS`` provided in this directory (rename it to ``Makefile``) and run 
 ```
 make
 ```
