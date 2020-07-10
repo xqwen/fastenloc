@@ -97,7 +97,7 @@ Required:
 
 Recommended:
 
-+ ``-total_variants``: specify the number of total SNPs interrogated. This option is important if GWAS or eQTL file does not contain all SNPs interrogated. 
++ ``-total_variants``: specify the number of total SNPs interrogated in GWAS data. This option is highly important if GWAS input does not contain all SNPs interrogated (e.g., in some cases, only fine-mapped geomic regions are included). fastENLOC also assumes that all annotated eQTL SNPs from the eqTL annotation file are part of the GWAS analysis.   
 
 Optional:
 
