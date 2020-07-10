@@ -261,22 +261,34 @@ void controller::enrich_est(){
 
     double sd0 = sqrt(var0 + bv0*(ImpN+1)/ImpN);
     double sd1 = sqrt(var1 + bv1*(ImpN+1)/ImpN);
-    string  enrich_file = prefix + string("enloc.enrich.out");
-    FILE *fd = fopen(enrich_file.c_str(), "w");
-
-    fprintf(fd, "%25s   %7.3f     %7.3f\n","Intercept", a0_est, sd0);
-    fprintf(fd, "%25s   %7.3f     %7.3f\n","Enrichment (no shrinkage)", a1_est, sd1);
+    
+    double a1_est_ns  = a1_est;
+    double sd1_ns = sd1;
     
     // apply shrinkage
     if(prior_variance > 0){
         double post_var = 1.0/(1.0/prior_variance + 1/(sd1*sd1));
-        double post_est = (a1_est*prior_variance)/(prior_variance + sd1*sd1); 
-        a1_est = post_est;
-        fprintf(fd, "%25s   %7.3f     %7.3f\n","Enrichment (w/ shrinkage)", a1_est, sqrt(post_var));
+        a1_est = (a1_est_ns*prior_variance)/(prior_variance + sd1_ns*sd1_ns); 
+        sd1 = sqrt(post_var);
     }
 
+
+    a0_est = log(P_gwas/(1+P_eqtl*exp(a1_est) - P_eqtl - P_gwas));
+
+    string  enrich_file = prefix + string("enloc.enrich.out");
+    FILE *fd = fopen(enrich_file.c_str(), "w");
+    fprintf(fd, "%25s   %7.3f     %7s\n","Intercept", a0_est, "-");
+    fprintf(fd, "%25s   %7.3f     %7.3f\n","Enrichment (no shrinkage)", a1_est_ns, sd1_ns);
+    fprintf(fd, "%25s   %7.3f     %7.3f\n","Enrichment (w/ shrinkage)", a1_est, sd1);
     fclose(fd);
+
+
+
+
     set_enrich_params(a0_est, a1_est);
+
+
+
 
     //pi1_e = exp(a0_est+a1_est)/(1+exp(a0_est + a1_est));
     //pi1_ne =  exp(a0_est)/(1+exp(a0_est));
@@ -463,6 +475,7 @@ vector<double> controller::run_EM(vector<int> &eqtl_sample){
 
         a1 = a1_new;
         a0 = log(e0g1/e0g0);
+        //a0 = log((e0g1+1)/(e0g0+1));
 
         r0 = exp(a0);
         r1 = exp(a0+a1);
