@@ -3,4 +3,4 @@
 
 Run ```make``` to generate the output from fastENLOC analysis.
 
-```sim_data/sim.truth.rst``` contains the truth of the simulation.
+The file ```sim_data/sim.truth.rst``` contains the truth of the simulation.
