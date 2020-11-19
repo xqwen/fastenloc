@@ -12,3 +12,7 @@ analysis:
 	Rscript scripts/coloc_power.R
 	echo "Generate plots"
 	Rscript scripts/plot_scatter.R 
+	if [ ! -d "dap_eqtl" ]; then exit; fi
+	perl scripts/classify_snp.pl > results/error_class.dat
+	Rscript scripts/plot_type_ratio.R
+
