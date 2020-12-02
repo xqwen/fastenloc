@@ -30,13 +30,34 @@ The PIP can be generated from any Bayesian fine-mapping algorithms (DAP-G, CAVIA
 Command line syntax
 
 ```
-fastenloc -e eqtl_annotation_gzipped -g gwas_data_gzipped -t tissue_name [-thread n] [-prefix prefix_name] [-total_variant total_snp] [-s shrinkage] 
+fastenloc -e eqtl_annotation_gzipped -g gwas_data_gzipped -t tissue_name [-thread n] [-prefix prefix_name] [-total_variant total_snp] [-s shrinkage] [--enrich] 
 ```
-For example to run colocalization analysis of Height GWAS and whole blood eQTLs, run
-
+For example to run colocalization analysis of Height GWAS and GTEx (v8) whole blood eQTLs, run
 ```
 fastenloc -e gtex_v8.eqtl_annot.vcf.gz -g Height.gwas.pip -t Whole_Blood -prefix Height_Blood
 ```
+
+### Command line arguments
+
++ ```-e eqtl_input``` (required): specify the eQTL annotation input file.
+                                  
++ ```-g gwas_input``` (required): specify the GWAS PIP input file.
+
++ ```-t tissue_name``` (required for multi-tissue eQTL input): specify the tissue name for eQTLs.
+
++ ```-thread n``` (optional): specify the number of simultaneous threads for multiple imputation in enrichment analysis. The default is to use a single thread.
+
++ ```-prefix prefix_name``` (optional): specify the alternative prefix for the output files. By default, all outputs have prefix "enloc".
+
++ ```-total_variant total_gwas_snps``` (optional): specify the number of total GWAS SNPs for analysis. It is important to specify this number to obtain calibrated enrichment estimates.
+
++ ```-s shrinkage``` (optional): the shrinkage prior for the enrichment parameter. The prior is assumed be N(0, 1/shrinkage). By default, we set shrinkage = 1. if shrinkage is set to 0 , the prior becomes flat, and there is no shrinkage effect.
+
++ ```--enrich``` (optional): run enrichment analysis only.
+
+
+                                                               
+
 
 ## Output
 
