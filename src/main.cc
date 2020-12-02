@@ -34,6 +34,7 @@ int main(int argc, char **argv){
 
     int ImpN = 25;
     int nthread = 1;
+    int enrich_est_only = 0;
     double shrinkage = -1;
 
     int total_snp = 0;
@@ -111,6 +112,11 @@ int main(int argc, char **argv){
             continue;
         }
 
+        if(strcmp(argv[i], "--est")==0 || strcmp(argv[i], "--est_only")==0 || strcmp(argv[i], "--enrich")==0 || strcmp(argv[i], "--enrich_only")==0){
+            enrich_est_only = 1;
+            continue;
+        }
+
         fprintf(stderr,"Error: unknown command option \'%s\'\n", argv[i]); 
         continue;
 
@@ -152,6 +158,7 @@ int main(int argc, char **argv){
     }else{
         con.enrich_est();
     }
-
-    con.compute_coloc_prob();
+    if(!enrich_est_only){
+        con.compute_coloc_prob();
+    }
 }   
