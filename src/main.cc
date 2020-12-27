@@ -6,6 +6,20 @@
 #define LENGTH 1024
 #define UNDEF -99999999
 
+int show_banner(){
+
+    fprintf(stderr, "\t\t==================================================================\n\n");
+    fprintf(stderr, "\t\t                     fastENLOC (v1.0)                             \n\n");
+    fprintf(stderr, "\t\t                Release date:  July, 2020                         \n\n"); 
+    fprintf(stderr, "\t\t==================================================================\n\n\n");
+    return 1;
+}
+
+int print_usage(){
+
+    fprintf(stderr, "\nUsage: fastenloc -eqtl eqtl_file -gwas gwas_file [-tissue tissue_name] [-total_variants total_number_of_gwas_variants] [-thread number_of_processing_thread] [-s shrinkage_param] [-prefix output_prefix] \n\n");
+    return 1;
+}
 
 int main(int argc, char **argv){
 
@@ -122,6 +136,70 @@ int main(int argc, char **argv){
 
 
     }
+    
+    show_banner();
+
+    // check required options
+
+    if(strlen(eqtl_file)==0){
+        fprintf(stderr, "Error: molecular QTL annotation file is unspecified ... exit\n");
+        print_usage();
+        exit(1);
+    }
+
+    if(strlen(gwas_file)==0){
+        fprintf(stderr, "Error: GWAS fine-mapping  file is unspecified ... exit\n");
+        print_usage();
+        exit(2);
+    }
+
+
+    // print command line options
+    
+    fprintf(stderr, "\nParameters and options:\n\n");
+    fprintf(stderr, "Input files:\n");
+    fprintf(stderr, "    * Molecular qtl annotation file: %s\n", eqtl_file);
+    fprintf(stderr, "    * GWAS fine-mapping file: %s\n", gwas_file);
+    if(strlen(tissue) !=0){
+        fprintf(stderr, "    * Tissue specified: %s\n", tissue);
+    }
+
+
+    fprintf(stderr, "\nEnrichment parameters:\n");
+    if(p1 != UNDEF || a1 != UNDEF){
+        fprintf(stderr, "    * Specified, skip estimation procedure\n");
+    }else{
+        fprintf(stderr, "    * Rounds of multiple imputation: %d\n", ImpN);
+        double shp = 1.0;
+        if(shrinkage != -1){
+            shp = shrinkage;
+        }
+        fprintf(stderr, "    * Shrinkage parameter: %.1f\n", shp);
+    }
+
+
+    fprintf(stderr, "\nMiscsellaneous options:\n");
+    fprintf(stderr, "    * Total GWAS variants: ");
+    if(total_snp == 0){
+        fprintf(stderr, "unspecified, use GWAS file input\n");
+    }else{
+        fprintf(stderr, "%d\n", total_snp);
+    }
+
+    fprintf(stderr, "    * Simultaneous running threads: %d\n", nthread);
+    
+
+
+    fprintf(stderr, "\nOutput options:\n");
+    if(strlen(prefix) !=0)
+        fprintf(stderr, "    * Output file prefix: %s\n", prefix);
+    fprintf(stderr, "    * RCP and SCP output threshold: %.1e\n", output_thresh);
+
+
+    fprintf(stderr, "\n\n");
+
+
+
 
 
     controller con;
@@ -142,9 +220,16 @@ int main(int argc, char **argv){
     if(shrinkage >0){
         pv = 1/shrinkage;
     }
-        
+
     con.set_prior_variance(pv);
+
     
+
+
+
+
+
+
 
 
     con.load_eqtl(eqtl_file, tissue);
