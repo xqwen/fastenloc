@@ -13,6 +13,9 @@ class controller {
         vector<sigCluster> gwas_vec;
         map<string, int> eqtl_sig_index;
         map<string, int> gwas_sig_index;
+
+	map<string, string> snp2gwas_locus;
+
         
         map<string, int> snp_index;
         vector<string> snp_vec;
