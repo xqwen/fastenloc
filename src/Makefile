@@ -1,7 +1,8 @@
 CXX=g++
+CPPFLAGS+=-isystem /opt/homebrew/include # Mac libraries installed via Homebrew
+CPPFLAGS+=-Xpreprocessor -fopenmp # Mac openmp
 CXXFLAGS+=-O3 -Wall
-INC=-isystem /opt/homebrew/include # Mac libraries installed via Homebrew
-LIBS=-lm -lgsl -lgslcblas -lboost_iostreams -lz -lomp
+LDLIBS=-lm -lgsl -lgslcblas -lboost_iostreams -lz -lomp #gcc build doesn't need -lomp?
 LDFLAGS=-L/opt/homebrew/lib
 
 objects = main.o controller.o sigCluster.o
@@ -9,15 +10,12 @@ objects = main.o controller.o sigCluster.o
 all: fastenloc
 
 fastenloc: $(objects)
-	$(CXX) $(CXXFLAGS) $(INC) -Xpreprocessor -fopenmp $(LDFLAGS) $(objects) $(LIBS) -o fastenloc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(objects) $(LDLIBS) -o fastenloc
 static: $(objects)
-	$(CXX) $(CXXFLAGS) $(INC) -Xpreprocessor -fopenmp $(LDFLAGS) $(objects) $(LIBS) -static -o fastenloc.static
-main.o: main.cc
-	$(CXX) $(CXXFLAGS) $(INC) -c  main.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(objects) $(LDLIBS) -static -o fastenloc.static
+
 controller.o: controller.cc controller.h
-	$(CXX) $(CXXFLAGS) $(INC) -Xpreprocessor -fopenmp -c  controller.cc
 sigCluster.o: sigCluster.h sigCluster.cc
-	$(CXX) $(CXXFLAGS) $(INC) -c sigCluster.cc
 
 .PHONY: clean
 clean:
