@@ -28,6 +28,38 @@ If you prefer to using newly released GTEx v8 eQTL annotation for analysis, plea
 +  [Multi-tissue eQTL annotation with hg38 position ID](https://drive.google.com/open?id=1kfH_CffxyCtZcx3z7k63rIARNidLv1_P) 
 +  [Multi-tissue eQTL annotation with rs ID](https://drive.google.com/open?id=1rSaHenk8xOFtQo7VuDZevRkjUz6iwuj0)
 
+## Building fastenloc
+You will need a working C++ compiler and `make` already installed and configured. Installing additional library 
+dependencies is described below.
+### Debian family (Ubuntu)
+```shell
+sudo apt install libgsl-dev libboost-iostreams-dev zlib1g-dev
+cd src
+make
+```
+
+### RHEL family (CentOS, Rocky)
+```shell
+sudo yum install boost-devel gsl-devel zlib-devel
+cd src
+make
+```
+
+### Other Linux, or building libraries from source:
+* [GNU Scientific Library](https://www.gnu.org/software/gsl/)
+* [ZLib](https://zlib.net/)
+* [Boost iostreams](https://www.boost.org/doc/libs/)
+
+### MacOS
+You will want [Homebrew](https://brew.sh/) installed to easily install libraries. It's possible to build all of the necessary
+library dependencies from scratch if you prefer.
+
+```shell
+brew install gsl boost libomp
+cd src
+make
+```
+
 
 ## Citation
 
