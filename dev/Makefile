@@ -1,12 +1,19 @@
-main: main.o controller.o sigCluster.o
-	g++ -fopenmp -O3 main.o controller.o sigCluster.o  -lm -lgsl -lgslcblas -lboost_iostreams -lz  -o fastenloc
+CC = g++
+CFLAG = -O3  -fopenmp
+LIB = -lm -lgsl -lgslcblas -lboost_iostreams -lz
+
+
+
+
+fastenloc: main.o controller.o sigCluster.o
+	$(CC) $(CFLAG)  $^ -o $@ $(LIB)
 static: main.o controller.o sigCluster.o
-	g++ -fopenmp -O3 main.o controller.o sigCluster.o  -lm -lgsl -lgslcblas -lboost_iostreams -lz  -static -o fastenloc.static
+	  	$(CC) $(CFLAG) $^ -o fastenloc.static $(LIB) -static
 main.o: main.cc
-	g++ -c  main.cc
+	$(CC) $(CFLAG) -c  main.cc
 controller.o: controller.cc controller.h
-	g++ -fopenmp   -c  controller.cc
+	$(CC) $(CFLAG) -c  controller.cc
 sigCluster.o: sigCluster.h sigCluster.cc
-	g++ -c sigCluster.cc 
+	$(CC) $(CFLAG) -c sigCluster.cc
 clean:
 	rm *.o fastenloc
