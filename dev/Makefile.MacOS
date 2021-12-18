@@ -1,0 +1,18 @@
+CC = g++
+CCFLAGS =  -Xpreprocessor -fopenmp -O3
+LIBS = -lm -lgsl -lgslcblas -lboost_iostreams -lz -lomp
+
+
+
+fastenloc: main.o controller.o sigCluster.o
+	$(CC) $(CCFLAGS)  $^ -o $@ $(LIBS)
+static: main.o controller.o sigCluster.o
+	  	$(CC) $(CCFLAG) $^ -o fastenloc.static $(LIBS) -static
+main.o: main.cc
+	$(CC) $(CCFLAG) -c  main.cc
+controller.o: controller.cc controller.h
+	$(CC) $(CCFLAGS) -c  controller.cc
+sigCluster.o: sigCluster.h sigCluster.cc
+	$(CC) $(CCFLAGS) -c sigCluster.cc
+clean:
+	rm *.o fastenloc
