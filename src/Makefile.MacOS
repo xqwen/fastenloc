@@ -1,7 +1,6 @@
 CC = g++
-CCFLAGS = -O3  -fopenmp
-LIBS = -lm -lgsl -lgslcblas -lboost_iostreams -lz
-
+CCFLAGS =  -Xpreprocessor -fopenmp -O3
+LIBS = -lm -lgsl -lgslcblas -lboost_iostreams -lz -lomp
 
 
 
