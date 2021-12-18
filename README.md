@@ -18,18 +18,18 @@ A detailed tutorial is provided in [``tutorial``](https://github.com/xqwen/faste
 2. Prepare GWAS sumary (in term of posterior inclusion probabilities, or PIPs)
 3. Run fastenloc
 
-We distribute pre-computed eQTL annotations from GTEx (v8) data. In the simplest case, the required GWAS PIPs can be computed from single-SNP association summary-statistics (e.g., z-scores and p-values) using [``torus``](https://github.com/xqwen/torus/) 
+We distribute pre-computed eQTL annotations from GTEx (v8) data. In the simplest case, the required GWAS PIPs can be computed from single-SNP association summary-statistics (e.g., z-scores and p-values) using [``torus``](https://github.com/xqwen/torus/)
 
 
 ## GTEx v8 multi-tissue eQTL annotations for fastENLOC
 
 If you prefer to using newly released GTEx v8 eQTL annotation for analysis, please download the following vcf files
 
-+  [Multi-tissue eQTL annotation with hg38 position ID](https://drive.google.com/open?id=1kfH_CffxyCtZcx3z7k63rIARNidLv1_P) 
++  [Multi-tissue eQTL annotation with hg38 position ID](https://drive.google.com/open?id=1kfH_CffxyCtZcx3z7k63rIARNidLv1_P)
 +  [Multi-tissue eQTL annotation with rs ID](https://drive.google.com/open?id=1rSaHenk8xOFtQo7VuDZevRkjUz6iwuj0)
 
 
 ## Citation
 
 1. Wen, X., Pique-Regi, R., Luca, F. Integrating Molecular QTL Data into Genome-wide Genetic Association Analysis: Probabilistic Assessment of Enrichment and Colocalization. *PLOS Genetics*. 2017 Mar 13(3): e1006646.
-2. Pividori and Rajagopal et al. PhenomeXcan: Mapping the genome to the phenome through the transcriptome. *BioRxiv* 2019: doi: 10.1101/833210
+2. Pividori and Rajagopal et al. PhenomeXcan: Mapping the genome to the phenome through the transcriptome. *BioRxiv* 2019: doi: 10.1101/833210.
