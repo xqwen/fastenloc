@@ -12,7 +12,8 @@ For questions/comments regarding to the software package, please contact Xiaoqua
 + Locus-level colcoalization analysis
 + Auto diagnosis of input files
 + Utility scripts for generating input files and computing gene-level colocalization probabilities (GLCP and GRCP). 
-
++ Code optimization
++ Bug fix
 
 ## License
 
