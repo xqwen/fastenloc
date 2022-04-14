@@ -9,8 +9,8 @@
 int show_banner(){
 
     fprintf(stderr, "\t\t==================================================================\n\n");
-    fprintf(stderr, "\t\t                     fastENLOC (v2.0 beta)                        \n\n");
-    fprintf(stderr, "\t\t                        August, 2021                              \n\n"); 
+    fprintf(stderr, "\t\t                     fastENLOC (v1.0)                             \n\n");
+    fprintf(stderr, "\t\t                Release date:  July, 2020                         \n\n"); 
     fprintf(stderr, "\t\t==================================================================\n\n\n");
     return 1;
 }

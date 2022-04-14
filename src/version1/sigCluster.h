@@ -15,7 +15,6 @@ class sigCluster {
         vector<double> coloc_vec;    
 
         double coloc_prob;
-        double locus_coloc_prob;
 
     private:
         double *pip_prob;
@@ -24,7 +23,6 @@ class sigCluster {
 
         sigCluster(){
             pip_prob = 0;
-            coloc_prob = locus_coloc_prob = cpip = 0;
         }
 
         int impute_qtn(const gsl_rng *r);

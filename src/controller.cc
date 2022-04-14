@@ -342,7 +342,7 @@ void controller::compute_coloc_prob(){
 	FILE * fd2 = fopen(sig_file.c_str(),"w");
 
 	fprintf(fd1, "Signal\tSNP\tPIP_qtl\tPIP_gwas_marginal\tPIP_gwas_qtl_prior\tSCP\n");
-	fprintf(fd2, "Signal\tNum_SNP\tCPIP_qtl\tCPIP_gwas_marginal\tCPIP_gwas_qtl_prior\tRCP\n");
+	fprintf(fd2, "Signal\tNum_SNP\tCPIP_qtl\tCPIP_gwas_marginal\tCPIP_gwas_qtl_prior\tRCP\tLCP\n");
 
 
 	double r_null = pi1/(1-pi1);
@@ -352,9 +352,11 @@ void controller::compute_coloc_prob(){
 
 	for(int i=0;i<eqtl_vec.size();i++){
 		eqtl_vec[i].coloc_prob = 0;    
+        eqtl_vec[i].locus_coloc_prob = 0;
 		vector<double> gprob_vec_null;
 		double gprob_null = 0;
 		vector<double> gbf_vec;
+
 
 		for(int k=0;k<eqtl_vec[i].snp_vec.size();k++){
 			string snp = eqtl_vec[i].snp_vec[k];
@@ -376,7 +378,16 @@ void controller::compute_coloc_prob(){
 		double sum_bf = nc - (1-pi1)/pi1;
 		vector<double> bf_vec;
 
+
+        // for consolidated locus-level colocalization
+        double locus_gpip = gprob_null;
+        double locus_epip = 0;
+        // lcp def done
+
 		for(int k=0;k<eqtl_vec[i].snp_vec.size();k++){
+            // lcp comp
+            locus_epip += eqtl_vec[i].pip_vec[k];
+            // lcp comp done
 			double bf = gprob_vec_null[k]*nc;
 			bf_vec.push_back(bf);
 		}
@@ -387,14 +398,18 @@ void controller::compute_coloc_prob(){
 		string max_snp;
 
 		for(int k=0;k<eqtl_vec[i].snp_vec.size();k++){
+
 			string snp = eqtl_vec[i].snp_vec[k];
-			double d = gprob_vec_null[k];
-			double r = eqtl_vec[i].pip_vec[k];
-			double prob = pi1_e*(1-pi1_ne)*bf_vec[k]/((1-pi1_ne)*(1-pi1_e)+pi1_ne*(1-pi1_e)*(sum_bf-bf_vec[k])+pi1_e*(1-pi1_ne)*bf_vec[k]);
+			
+            double prob = bf_vec[k]/( (1-pi1_e)/pi1_e +((1-pi1_e)/pi1_e)*(pi1_ne/(1-pi1_ne))*(sum_bf-bf_vec[k])+ bf_vec[k]);
 			// snp level coloc prob
-			double p_coloc = prob*r;
+			double p_coloc = prob*eqtl_vec[i].pip_vec[k];
 			double gprob_e = p_coloc;
 			eqtl_vec[i].coloc_prob += p_coloc;
+            eqtl_vec[i].locus_coloc_prob += p_coloc;
+
+            // update overall GWAS association evidence considering informative QTL prior: gprob_e
+            
 
 			//other non-coloc possibilities
 			// no eqtl, k-th SNP is the gwas hit
@@ -405,13 +420,14 @@ void controller::compute_coloc_prob(){
 			for(int j=0;j<eqtl_vec[i].snp_vec.size();j++){
 				if(j==k)
 					continue;
-				prob = pi1_ne*(1-pi1_e)*bf_vec[k]/( (1-pi1_e)*(1-pi1_ne) + pi1_ne*(1-pi1_e)*(sum_bf-bf_vec[j])+pi1_e*(1-pi1_ne)*bf_vec[j]);
-				gprob_e += prob* eqtl_vec[i].pip_vec[j];
+				prob = bf_vec[k]/( ((1-pi1_ne)/pi1_ne) + (sum_bf-bf_vec[j])+ (pi1_e/(1-pi1_e))*((1-pi1_ne)/pi1_ne)*bf_vec[j]);
+				gprob_e += prob*eqtl_vec[i].pip_vec[j];
+                eqtl_vec[i].locus_coloc_prob += prob*eqtl_vec[i].pip_vec[j]; 
 			}
 
 			string locus_id = eqtl_vec[i].id + "(@)"+snp2gwas_locus[snp];
 			if(p_coloc>=output_thresh)
-				fprintf(fd1,"%15s   %15s   %7.3e %7.3e    %7.3e      %7.3e\n",locus_id.c_str(), snp.c_str(), r,d, gprob_e,  p_coloc);
+				fprintf(fd1,"%15s   %15s   %7.3e %7.3e    %7.3e      %7.3e\n",locus_id.c_str(), snp.c_str(), eqtl_vec[i].pip_vec[k], gprob_vec_null[k], gprob_e,  p_coloc);
 			gwas_cpip += gprob_e; 
 			if(p_coloc >= max_scp){
 				max_scp = p_coloc;
@@ -420,9 +436,21 @@ void controller::compute_coloc_prob(){
 
 		}
 
-		if(eqtl_vec[i].coloc_prob>=output_thresh){
+        // lcp comp (proposed solution) -- DAP
+        int np = eqtl_vec[i].snp_vec.size();
+        double locus_bf = (1.0/np)*(locus_gpip/(1-locus_gpip))/(pi1/(1-pi1));
+        double factor = (1-pi1_ne)*(1-pi1_e)/((1-pi1_ne)*pi1_e + (np-1)*(1-pi1_e)*pi1_ne);
+        double locus_coloc_prob = (locus_bf/(factor+ locus_bf))*locus_epip;
+
+        if(locus_coloc_prob< eqtl_vec[i].coloc_prob){
+            locus_coloc_prob = eqtl_vec[i].coloc_prob;
+        }
+
+        // lcp comp done
+
+		if(eqtl_vec[i].coloc_prob>=output_thresh || locus_coloc_prob>=output_thresh){
 			string locus_id = eqtl_vec[i].id + "(@)"+snp2gwas_locus[max_snp];
-			fprintf(fd2, "%15s   %4d  %7.3e %7.3e    %7.3e      %7.3e\n",locus_id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_null, gwas_cpip, eqtl_vec[i].coloc_prob);
+			fprintf(fd2, "%15s   %4d  %7.3e %7.3e    %7.3e      %7.3e\t%7.3e\n",locus_id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_null, gwas_cpip, eqtl_vec[i].coloc_prob, locus_coloc_prob);
 		}
 
 	}
@@ -463,16 +491,20 @@ vector<double> controller::run_EM(vector<int> &eqtl_sample){
 			double val = gwas_pip_vec[i];
 			if(val==1)
 				val = 1 - 1e-8;
-			val = val/(1-val);   
+            // posterior ratio
+			val = val/(1-val);
+            // val/r_null is marginal likelihood/bayes factor
 			if(eqtl_sample[i]==0){
-				val = r0*val/r_null;
+                val = r0*(val/r_null);
+                // updated posterior with current prior given eqtl = 0
 				val = val/(1+val);
 				e0g1 += val;
 				e0g0 += 1 - val;
 			}   
 
 			if(eqtl_sample[i]==1){
-				val = r1*val/r_null;
+				val = r1*(val/r_null);
+                // updated posterior with current prior given eqtl = 1
 				val = val/(1+val);
 				e1g1 += val;
 				e1g0 += 1 - val;
@@ -481,9 +513,11 @@ vector<double> controller::run_EM(vector<int> &eqtl_sample){
 		}
 
 		e0g0 += total_snp-(e0g0+e0g1+e1g0+e1g1);
-
+        
 
 		double a1_new = log(e1g1*e0g0/(e1g0*e0g1));
+        
+        //printf("EM:  %f\t%f\t%f\t%fi\t\t%f\t%f\n", e0g0, e1g1, e1g0, e0g1,a1_new, a1);
 		if(fabs(a1_new-a1)<0.01){
 			a1 = a1_new;
 			var1 = (1.0/e0g0 + 1.0/e1g0 + 1.0/e1g1 + 1.0/e0g1);
