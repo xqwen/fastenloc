@@ -52,6 +52,7 @@ int main(int argc, char **argv){
     double shrinkage = -1;
 
     int total_snp = 0;
+    int set_warning = 0;
 
     for(int i=1;i<argc;i++){
 
@@ -144,7 +145,7 @@ int main(int argc, char **argv){
     if(strlen(eqtl_file)==0){
         fprintf(stderr, "Error: molecular QTL annotation file is unspecified ... exit\n");
         print_usage();
-        exit(1);
+        exit(2);
     }
 
     if(strlen(gwas_file)==0){
@@ -153,6 +154,10 @@ int main(int argc, char **argv){
         exit(2);
     }
 
+    if(total_snp == 0){
+        fprintf(stderr, "Warning: total number of GWAS variants is unspecified (use \"-tv\" option to specify)\n");
+        set_warning = 1;
+    }
 
     // print command line options
     
@@ -246,4 +251,13 @@ int main(int argc, char **argv){
     if(!enrich_est_only){
         con.compute_coloc_prob();
     }
+
+
+    fprintf(stderr, "\nfastENLOC analysis is completed ");
+    if(set_warning == 1){
+        fprintf(stderr, "with 1 warning");
+    }
+    fprintf(stderr,"\n\n");
+
+
 }   

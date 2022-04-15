@@ -379,11 +379,15 @@ void controller::compute_coloc_prob()
 
 	string snp_file = prefix + string("enloc.snp.out");
 	string sig_file = prefix + string("enloc.sig.out");
+	string gen_file = prefix + string("enloc.gene.out");
+
 	FILE *fd1 = fopen(snp_file.c_str(), "w");
 	FILE *fd2 = fopen(sig_file.c_str(), "w");
+	FILE *fd3 = fopen(gen_file.c_str(), "w");
 
 	fprintf(fd1, "Signal\tSNP\tPIP_qtl\tPIP_gwas_marginal\tPIP_gwas_qtl_prior\tSCP\n");
 	fprintf(fd2, "Signal\tNum_SNP\tCPIP_qtl\tCPIP_gwas_marginal\tCPIP_gwas_qtl_prior\tRCP\tLCP\n");
+	fprintf(fd3, "Gene\t\tGRCP\tGLCP\n");
 
 	double r_null = pi1 / (1 - pi1);
 	double r1 = pi1_e / (1 - pi1_e);
@@ -482,24 +486,61 @@ void controller::compute_coloc_prob()
 		int np = eqtl_vec[i].snp_vec.size();
 		double locus_bf = (1.0 / np) * (locus_gpip / (1 - locus_gpip)) / (pi1 / (1 - pi1));
 		double factor = (1 - pi1_ne) * (1 - pi1_e) / ((1 - pi1_ne) * pi1_e + (np - 1) * (1 - pi1_e) * pi1_ne);
-		double locus_coloc_prob = (locus_bf / (factor + locus_bf)) * locus_epip;
+		double lcp = (locus_bf / (factor + locus_bf)) * locus_epip;
 
-		if (locus_coloc_prob < eqtl_vec[i].coloc_prob)
+		if (lcp < eqtl_vec[i].coloc_prob)
 		{
-			locus_coloc_prob = eqtl_vec[i].coloc_prob;
+			lcp = eqtl_vec[i].coloc_prob;
 		}
+
+		eqtl_vec[i].locus_coloc_prob = lcp;
 
 		// lcp comp done
 
-		if (eqtl_vec[i].coloc_prob >= output_thresh || locus_coloc_prob >= output_thresh)
+		if (eqtl_vec[i].coloc_prob >= output_thresh || eqtl_vec[i].locus_coloc_prob >= output_thresh)
 		{
 			string locus_id = eqtl_vec[i].id + "(@)" + snp2gwas_locus[max_snp];
-			fprintf(fd2, "%15s   %4d  %7.3e %7.3e    %7.3e      %7.3e\t%7.3e\n", locus_id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_null, gwas_cpip, eqtl_vec[i].coloc_prob, locus_coloc_prob);
+			fprintf(fd2, "%15s   %4d  %7.3e %7.3e    %7.3e      %7.3e\t%7.3e\n", locus_id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_null, gwas_cpip, eqtl_vec[i].coloc_prob, eqtl_vec[i].locus_coloc_prob);
 		}
+
 	}
 
+
+
+	// gene-level quantification
+	map<string, double> GLCP;
+	map<string, double> GRCP;
+
+	for (int i = 0; i < eqtl_vec.size(); i++)
+	{
+		string loc_id = eqtl_vec[i].id;
+		int pos = loc_id.find(":");
+		string gene_id = loc_id.substr(0,pos);
+		if(GLCP.find(gene_id)==GLCP.end()){
+			GLCP[gene_id] = 1;
+			GRCP[gene_id] = 1;
+		}
+
+		GLCP[gene_id] *= (1-eqtl_vec[i].locus_coloc_prob);
+		GRCP[gene_id] *= (1-eqtl_vec[i].coloc_prob);
+
+	}
+
+
+
+	std::map<string, double>::iterator it = GRCP.begin();
+	while (it != GRCP.end())
+	{
+		string gene = it->first;
+		double v1 = 1 - it->second;
+		double v2 = 1- GLCP[gene];
+		fprintf(fd3, "%s\t\t%7.3e\t%7.3e\n", gene.c_str(), v1, v2);
+		it++;
+	}
+	
 	fclose(fd1);
 	fclose(fd2);
+	fclose(fd3);
 }
 
 vector<double> controller::run_EM(vector<int> &eqtl_sample)

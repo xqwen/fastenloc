@@ -14,8 +14,8 @@ class sigCluster {
         vector<string> snp_vec;
         vector<double> coloc_vec;    
 
-        double coloc_prob;
-        double locus_coloc_prob;
+        double coloc_prob; 
+        double locus_coloc_prob; 
 
     private:
         double *pip_prob;
