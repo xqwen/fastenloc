@@ -53,6 +53,9 @@ int main(int argc, char **argv){
 
     int total_snp = 0;
     int set_warning = 0;
+    int set_error = 0;
+
+    show_banner();
 
     for(int i=1;i<argc;i++){
 
@@ -132,24 +135,29 @@ int main(int argc, char **argv){
             continue;
         }
 
-        fprintf(stderr,"Error: unknown command option \'%s\'\n", argv[i]); 
+        fprintf(stderr,"\nError: unknown command option \'%s\'\n", argv[i]); 
+        set_error = 1;
         continue;
 
 
     }
     
-    show_banner();
+
+    if(set_error==1){
+        print_usage();
+        exit(1);
+    }
 
     // check required options
 
     if(strlen(eqtl_file)==0){
-        fprintf(stderr, "Error: molecular QTL annotation file is unspecified ... exit\n");
+        fprintf(stderr, "Error: molecular QTL annotation file is unspecified \n\n");
         print_usage();
         exit(2);
     }
 
     if(strlen(gwas_file)==0){
-        fprintf(stderr, "Error: GWAS fine-mapping  file is unspecified ... exit\n");
+        fprintf(stderr, "Error: GWAS fine-mapping  file is unspecified\n\n");
         print_usage();
         exit(2);
     }
