@@ -339,6 +339,13 @@ void controller::enrich_est()
 	fprintf(fd, "%25s   %7.3f     %7s\n", "Intercept", a0_est, "-");
 	fprintf(fd, "%25s   %7.3f     %7.3f\n", "Enrichment (no shrinkage)", a1_est_ns, sd1_ns);
 	fprintf(fd, "%25s   %7.3f     %7.3f\n", "Enrichment (w/ shrinkage)", a1_est, sd1);
+
+	double p1 = (1-P_eqtl)* exp(a0_est)/(1+exp(a0_est));
+	double p2 = P_eqtl/(1+exp(a0_est+a1_est));
+	double p12 = P_eqtl*exp(a0_est+a1_est)/(1+exp(a0_est+a1_est));	
+
+	fprintf(fd,"\n\n## Alternative (coloc) parameterization: p1 = %7.3e, p2 = %7.3e, p12 = %7.3e\n\n",p1,p2,p12);
+	
 	fclose(fd);
 
 	set_enrich_params(a0_est, a1_est);
@@ -560,11 +567,8 @@ vector<double> controller::run_EM(vector<int> &eqtl_sample)
 		double pseudo_count = 1.0;
 		double e0g0 = pseudo_count * (1 - P_gwas) * (1 - P_eqtl);
 		double e0g1 = pseudo_count * (1 - P_eqtl) * P_gwas;
-		;
 		double e1g0 = pseudo_count * (1 - P_gwas) * P_eqtl;
-		;
 		double e1g1 = pseudo_count * P_gwas * P_eqtl;
-		;
 
 		for (int i = 0; i < snp_vec.size(); i++)
 		{
