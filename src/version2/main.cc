@@ -55,8 +55,6 @@ int main(int argc, char **argv){
     int set_warning = 0;
     int set_error = 0;
 
-    int gwas_format = 1;
-
     show_banner();
 
     for(int i=1;i<argc;i++){
@@ -68,12 +66,6 @@ int main(int argc, char **argv){
 
         if(strcmp(argv[i], "-g")==0 || strcmp(argv[i], "-gwas")==0){
             strcpy(gwas_file,argv[++i]);
-            continue;
-        }
-
-        if(strcmp(argv[i], "-go")==0){
-            strcpy(gwas_file,argv[++i]);
-            gwas_format = 2;
             continue;
         }
 
@@ -254,12 +246,8 @@ int main(int argc, char **argv){
 
 
     con.load_eqtl(eqtl_file, tissue);
+    con.load_gwas_torus(gwas_file);
 
-    if(gwas_format == 1)
-        con.load_gwas(gwas_file);
-
-    if(gwas_format == 2)
-        con.load_gwas_torus(gwas_file);
 
     if(a0 != UNDEF && a1 != UNDEF){
         con.set_enrich_params(a0,a1);

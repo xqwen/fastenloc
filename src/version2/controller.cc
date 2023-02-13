@@ -11,15 +11,6 @@
 #include <math.h>
 #include <omp.h>
 
-
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// Input Processing ///////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 void controller::load_eqtl(char *eqtl_file, char *tissue)
 {
 
@@ -145,161 +136,8 @@ void controller::load_eqtl(char *eqtl_file, char *tissue)
 	fprintf(stderr, "read in %d SNPs, %d eQTL signal clusters, %.1f expected eQTLs\n\n", int(snp_vec.size()), int(eqtl_vec.size()), sum);
 
 	P_eqtl = sum;
+	// fprintf(stderr, "%d  %d    %7.3e  %f\n", int(snp_vec.size()), total_snp, P_eqtl, sum);
 }
-
-
-
-void controller::load_gwas(char *gwas_file, char *tissue)
-{
-
-	fprintf(stderr, "Processing complex trait data ... \n");
-	ifstream dfile(gwas_file, ios_base::in | ios_base::binary);
-	if (dfile.fail())
-	{
-		fprintf(stderr, "\nError: can't open complex trait file \"%s\". \n\n ", gwas_file);
-		exit(1);
-	}
-	boost::iostreams::filtering_istream in;
-
-	in.push(boost::iostreams::gzip_decompressor());
-	if (in.fail())
-	{
-		fprintf(stderr, "\nError: can't decompress complex trait file \"%s\". \n\n ", gwas_file);
-		exit(1);
-	}
-	in.push(dfile);
-
-	string line;
-	istringstream ins;
-
-	string chr;
-	string pos;
-	string snp_id; // important
-	string allele1;
-	string allele2;
-	string content;
-
-	string delim = "|";
-
-	double gwas_sum = 0;
-	int gwas_count = 0;
-	int format_status = 0;
-
-	while (getline(in, line))
-	{
-
-		ins.clear();
-		ins.str(line);
-
-		if (ins >> chr >> pos >> snp_id >> allele1 >> allele2>> content)
-		{
-			format_status = 1;
-			// passing content
-			size_t pos = 0;
-			string token;
-
-			do
-			{
-				pos = content.find(delim);
-				token = content.substr(0, pos);
-				size_t pos1 = token.find("@");
-				size_t pos2 = token.find("=");
-				size_t pos3 = token.find("[");
-				size_t pos4 = token.find("]");
-				string sig_id;
-				string tissue_type;
-				if (pos1 != string::npos && pos2 - pos1 > 1)
-				{
-					tissue_type = token.substr(pos1 + 1, pos2 - pos1 - 1);
-				}
-
-				sig_id = token.substr(0, pos1);
-
-				// printf("sig id = %s %d %d\n",sig_id.c_str(),pos2,pos1);
-				string pip = token.substr(pos2 + 1, pos3 - pos2 - 1);
-				string sig_pip = token.substr(pos3 + 1, pos4 - pos3 - 1);
-				// processing
-
-				// 
-
-				if (snp_index.find(snp_id) == snp_index.end())
-				{
-					snp_index[snp_id] = snp_vec.size();
-					snp_vec.push_back(snp_id);
-				}
-		
-					// new GWAS locus 
-				if (snp2gwas_locus.find(snp_id) == snp2gwas_locus.end())
-				{
-					snp2gwas_locus[snp_id] = sig_id;
-				}
-				else
-				{
-					snp2gwas_locus[snp_id] += "_" + sig_id;
-				}
-
-				if (gwas_sig_index.find(sig_id) == gwas_sig_index.end())
-				{
-					gwas_sig_index[sig_id] = gwas_vec.size();
-					sigCluster cluster;
-					cluster.id = sig_id;
-					cluster.cpip = 0;
-					gwas_vec.push_back(cluster);
-				}
-
-				int index = gwas_sig_index[sig_id];
-				double val = atof(pip.c_str());
-				gwas_vec[index].cpip += val;
-				gwas_vec[index].snp_vec.push_back(snp_id);
-				gwas_vec[index].pip_vec.push_back(val);
-				gwas_sum += val;
-				gwas_count++;
-		
-
-				content.erase(0, pos + delim.length());
-			} while (pos != string::npos);
-
-		}
-	}
-	if (format_status == 0)
-	{
-		fprintf(stderr, "\nError: unexpected format in complex trait file \"%s\".\n\n", gwas_file);
-		exit(1);
-	}
-
-	if (gwas_sum == 0)
-	{
-		fprintf(stderr, "\nError: no complex trait associations detected in \"%s\". \n\n", gwas_file);
-		exit(1);
-	}
-
-	gwas_pip_vec = vector<double>(snp_vec.size(), 0.0);
-
-	for (int i = 0; i < gwas_vec.size(); i++)
-	{
-		for (int j = 0; j < gwas_vec[i].snp_vec.size(); j++)
-		{
-			string snp = gwas_vec[i].snp_vec[j];
-			gwas_pip_vec[snp_index[snp]] = gwas_vec[i].pip_vec[j];
-		}
-	}
-
-	if (total_snp < snp_vec.size())
-		total_snp = snp_vec.size();
-
-	pi1 = gwas_sum / total_snp;
-
-	fprintf(stderr, "read in %d SNPs (eQTL+gwas), %d GWAS loci, %.1f expected hits\n\n", int(snp_vec.size()), int(gwas_vec.size()), gwas_sum);
-	
-	// estimated marginal priors
-	P_gwas = gwas_sum / total_snp;
-	P_eqtl = P_eqtl / total_snp;
-}
-
-
-
-
-// legacy GWAS format 
 
 void controller::load_gwas_torus(char *gwas_file)
 {
@@ -343,7 +181,6 @@ void controller::load_gwas_torus(char *gwas_file)
 		if (ins >> snp_id >> sig_id >> posterior)
 		{
 			format_status = 1;
-
 			if (snp_index.find(snp_id) == snp_index.end())
 			{
 				snp_index[snp_id] = snp_vec.size();
@@ -405,24 +242,10 @@ void controller::load_gwas_torus(char *gwas_file)
 	pi1 = gwas_sum / total_snp;
 
 	fprintf(stderr, "read in %d SNPs (eQTL+gwas), %d GWAS loci, %.1f expected hits\n\n", int(snp_vec.size()), int(gwas_vec.size()), gwas_sum);
-	
-	// estimated marginal priors
+	// fprintf(stderr, "%d  %d    %7.3e  %f\n", gwas_count, total_snp, pi1, gwas_sum);
 	P_gwas = gwas_sum / total_snp;
 	P_eqtl = P_eqtl / total_snp;
 }
-
-
-
-
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// Enrichment Estimation //////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
 
 void controller::enrich_est()
 {
@@ -438,8 +261,6 @@ void controller::enrich_est()
 	vector<double> a1_vec = vector<double>(ImpN, 0.0);
 	vector<double> v1_vec = vector<double>(ImpN, 0.0);
 
-	vector<double> eqtl_sample_vec = vector<double>(ImpN, 0.0);
-
 #pragma omp parallel for num_threads(nthread)
 	for (int k = 0; k < ImpN; k++)
 	{
@@ -448,16 +269,14 @@ void controller::enrich_est()
 
 		for (int i = 0; i < eqtl_vec.size(); i++)
 		{
-			// impute/sample eQTN
-			int index = eqtl_vec[i].impute_qtn(r);
-
-			if (index >= 0)
+			int rst = eqtl_vec[i].impute_qtn(r);
+			if (rst >= 0)
 			{
-				string snp = eqtl_vec[i].snp_vec[index];
+				string snp = eqtl_vec[i].snp_vec[rst];
 				eqtl_sample[snp_index[snp]] = 1;
-				eqtl_sample_vec[k] += 1;
 			}
 		}
+
 		vector<double> rst = run_EM(eqtl_sample);
 #pragma omp critical
 		{
@@ -468,11 +287,6 @@ void controller::enrich_est()
 		}
 		fprintf(stderr, "Imputation round %2d is completed\n", k + 1);
 	}
-
-
-    string mi_file = prefix + string("enloc.mi.out");
-	FILE *fd_mi = fopen(mi_file.c_str(), "w");
-	fprintf(fd_mi, "%7s\t%7s\t%7s\t%7s\n","a0", "a1", "p_eqtl", "p_gwas");
 
 	a0_est = 0;
 	a1_est = 0;
@@ -485,12 +299,8 @@ void controller::enrich_est()
 		a1_est += a1_vec[k];
 		var0 += v0_vec[k];
 		var1 += v1_vec[k];
-		double p_eqtl_mi = eqtl_sample_vec[k]/total_snp;
-		double p_gwas_mi = p_eqtl_mi*exp(a0_vec[k]+a1_vec[k])/(1+exp(a0_vec[k]+a1_vec[k])) + (1-p_eqtl_mi)*exp(a0_vec[k])/(1+exp(a0_vec[k]));  
-		fprintf(fd_mi, "%7.3f\t%7.3f\t\t%7.3e\t%7.3e\n", a0_vec[k], a1_vec[k],p_eqtl_mi, p_gwas_mi);
 	}
 
-	fclose(fd_mi);
 	a0_est = a0_est / ImpN;
 	a1_est = a1_est / ImpN;
 
@@ -545,7 +355,6 @@ void controller::enrich_est()
 	// printf("%7.3e  %7.3e     %7.3e\n", pi1_e, pi1_ne, pi1);
 
 	fprintf(stderr, "\nEnrichment analysis is completed\n");
-	fprintf(stderr, "pi1 = %7.3e  pi1_e = %7.3e pi1_ne = %7.3e\np_eqtl = %7.3e\n", pi1, pi1_e, pi1_ne, P_eqtl);
 
 	gsl_rng_free(r);
 	return;
@@ -587,213 +396,119 @@ void controller::compute_coloc_prob()
 	fprintf(fd2, "Signal\tNum_SNP\tCPIP_qtl\tCPIP_gwas_marginal\tCPIP_gwas_qtl_prior\tRCP\tLCP\n");
 	fprintf(fd3, "Gene\t\tGRCP\tGLCP\n");
 
-	double r_m = pi1 / (1 - pi1); // gwas prior odds 
+	double r_null = pi1 / (1 - pi1);
+	double r1 = pi1_e / (1 - pi1_e);
+	double r0 = pi1_ne / (1 - pi1_ne);
 
 	for (int i = 0; i < eqtl_vec.size(); i++)
 	{
 		eqtl_vec[i].coloc_prob = 0;
 		eqtl_vec[i].locus_coloc_prob = 0;
+		vector<double> gprob_vec_null;
+		double gprob_null = 0;
+		vector<double> gbf_vec;
 
-		vector<double> gprob_vec_m; // marginal gwas pips 
-		double gprob_cpip_m = 0; // marginal gwas cpip
- 
-		vector<double> glog10bf_vec; // gwas BF 
-
-		int p = eqtl_vec[i].snp_vec.size(); // number of SNPs
-
-		for (int k = 0; k < p; k++)
+		for (int k = 0; k < eqtl_vec[i].snp_vec.size(); k++)
 		{
 			string snp = eqtl_vec[i].snp_vec[k];
-			//double d = 1e-10;
-			//if(snp_index.find(snp) != snp_index.end())
 			double d = gwas_pip_vec[snp_index[snp]];
-			gprob_vec_m.push_back(d);
-			gprob_cpip_m += d;
+			gprob_vec_null.push_back(d);
+			gprob_null += d;
 		}
 
-		// renormalizing GWAS marginal PIP if necessary (advoid prob overflow due to LD difference)
-		if (gprob_cpip_m > 1 - 1e-5)
+		if (gprob_null > 1 - 1e-5)
 		{
 			// renormalize
-			for (int k = 0; k < p; k++)
+			for (int k = 0; k < eqtl_vec[i].snp_vec.size(); k++)
 			{
-				gprob_vec_m[k] = (1 - 1e-5) * (gprob_vec_m[k] / gprob_cpip_m);
+				gprob_vec_null[k] = (1 - 1e-5) * (gprob_vec_null[k] / gprob_null);
 			}
 
-			gprob_cpip_m = 1 - 1e-5;
+			gprob_null = 1 - 1e-5;
 		}
 
+		double nc = ((1 - pi1) / pi1) / (1 - gprob_null);
+		double sum_bf = nc - (1 - pi1) / pi1;
+		vector<double> bf_vec;
+
+		// for consolidated locus-level colocalization
+		double locus_gpip = gprob_null;
 		double locus_epip = 0;
-	
-	    // recovering GWAS BFs from fine-mapping results
-		for (int k = 0; k < p; k++)
+		// lcp def done
+
+		for (int k = 0; k < eqtl_vec[i].snp_vec.size(); k++)
 		{
-			double gpost = gprob_vec_m[k];
-			if(gpost == 0)
-				gpost = 1e-10;
-			double log10bf = log10(gpost/(1-gpost)) - log10(r_m); // bf = posterior_odds/prior_odds
-			glog10bf_vec.push_back(log10bf);
+			// lcp comp
 			locus_epip += eqtl_vec[i].pip_vec[k];
-		}
-		if(locus_epip > 1-1e-8)
-			locus_epip = 1 - 1e-8;
-
-		// computing p(d,r | E, G) by considering all configureations within a single signal cluster (DAP-1 approximation for both traits)
-
-		double NC = 0;
-        // case 1: null-null scenario
-		NC += pow(10, p*log10(1-pi1_ne)+log10(1-locus_epip));
-		// case 2: gwas only-eqtl null 
-		vector<double> g_only_prob_vec;
-		for (int k=0;k<p; k++)
-		{
-			double prob = pow(10, log10(pi1_ne) + (p-1)*log10(1-pi1_ne) + glog10bf_vec[k] + log10(1-locus_epip) );
-			NC += prob;
-			g_only_prob_vec.push_back(prob);
+			// lcp comp done
+			double bf = gprob_vec_null[k] * nc;
+			bf_vec.push_back(bf);
 		}
 
-		//case 3: eqtl only-gwas null
-		for (int k=0;k<p; k++)
-		{
-			NC += pow(10, log10(1-pi1_e) + (p-1)*log10(1-pi1_ne) + log10(eqtl_vec[i].pip_vec[k]));
-		}
-
-		//case 4: gwas-eqtl combination
-		vector<vector<double> > coloc_config; // coloc_config[m][n] indicates m-th SNP is the GWAS hit and n-th SNP is the causal eQTL 
-		// initialization
-		for (int k=0;k<p;k++){
-			coloc_config.push_back(vector<double>(p,0));
-		}
-
-		for (int m = 0; m<p; m++)
-		{
-			
-			for(int n=0; n<p; n++)
-			{
-				double log10_prior;
-				if(m==n){
-					log10_prior = log10(pi1_e)+(p-1)*log10(1-pi1_ne);
-				}else{
-					log10_prior = log10(pi1_ne)+log10(1-pi1_e)+(p-2)*log10(1-pi1_ne);
-
-				}
-				double prob = pow(10, log10_prior+ glog10bf_vec[m] + log10(eqtl_vec[i].pip_vec[n]));
-				NC += prob;
-				coloc_config[m][n] = prob;
-			}
-		}
-
-
-
-
-		// collecting results
-		vector<double> scp_vec; // snp-level colocalization probabilities; sum of it is RCP
-		vector<double> gpip_e_vec; // gwas pips informed by eQTL annotation
-		double RCP = 0;  // region-wise SNP-level colocalization probability
-		double LCP = 0;  // locus-level colocalization probability
-
-
-		for (int m=0; m<p; m++)
-		{
-			for (int n=0; n<p; n++)
-			{
-				double prob = coloc_config[m][n]/NC;
-				LCP += prob;
-
-				if(m==n)
-				{
-					RCP += prob;
-					scp_vec.push_back(prob);
-				}
-			}
-
-		}
-
-		eqtl_vec[i].coloc_prob = RCP;
-		eqtl_vec[i].locus_coloc_prob = LCP;
-		
-		double gprob_cpip_e = 0; // GWAS cluster/locus cpip with eQTL annotation
-
-		for (int m=0;m<p;m++)
-		{
-			// marginalize over (p+1) eQTL configurations for each GWAS SNP
-			double gprob_e = g_only_prob_vec[m]/NC;
-			for (int n=0;n<p;n++)
-			{
-				gprob_e += coloc_config[m][n]/NC;
-			}
-			gpip_e_vec.push_back(gprob_e);
-
-			gprob_cpip_e += gprob_e;
-		}
-
-		/*
-		// Alternative computation of RCP anf gprob_e based on Wen et al. 2016 (it gives similar results but needs to extend to LCP cases)
-		vector<double> gpip_e_vec2;
-		double gprob_cpip_e2 = 0;
-		vector<double> scp_vec2;
-		double RCP2 = 0;
-		for (int k=0;k<p;k++)
-		{
-			double ep = eqtl_vec[i].pip_vec[k];
-			double pi1_w_e = pi1_e*ep + pi1_ne*(1-ep);
-			double r_w_e = pi1_w_e/(1-pi1_w_e);
-
-			double old_pr = gprob_vec_m[k]/(1-gprob_vec_m[k]);
-			double new_pr = r_w_e*old_pr/r_m;
-			double gprob_w_e = new_pr/(1+new_pr);
-			gprob_cpip_e2 += gprob_w_e;
-			gpip_e_vec2.push_back(gprob_w_e);
-		}
-
-		if(gprob_cpip_e2 > 1-1e-8){
-			
-			for (int k=0;k<p;k++)
-				gpip_e_vec2[k] = (1-1e-8)*gpip_e_vec2[k]/gprob_cpip_e2;
-			gprob_cpip_e2 = 1 - 1e-8;
-		}
-
-		for (int k=0;k<p;k++)
-		{
-			double gprob_w_e = gpip_e_vec2[k];
-			double ep = eqtl_vec[i].pip_vec[k]; 
-			double scp = (pi1_e *ep/(pi1_e*ep + pi1_ne*(1-ep)))* gprob_w_e;
-			scp_vec2.push_back(scp);
-			RCP2 += scp;
-		}
-
-	*/
-
-
-		/////////////////////////////////////////////// Reporting ////////////////////////////////////
-		
+		double gwas_cpip = 0;
 		double max_scp = 0;
 		string max_snp;
 
 		for (int k = 0; k < eqtl_vec[i].snp_vec.size(); k++)
 		{
+
 			string snp = eqtl_vec[i].snp_vec[k];
-			string locus_id = eqtl_vec[i].id + "(@)" + snp2gwas_locus[snp];
-			if (scp_vec[k] >= output_thresh)
-				fprintf(fd1, "%15s   %15s   %7.3e %7.3e    %7.3e      %7.3e\n", locus_id.c_str(), snp.c_str(), eqtl_vec[i].pip_vec[k], gprob_vec_m[k], gpip_e_vec[k], scp_vec[k]);
-			if (scp_vec[k] >= max_scp)
+
+			double prob = bf_vec[k] / ((1 - pi1_e) / pi1_e + ((1 - pi1_e) / pi1_e) * (pi1_ne / (1 - pi1_ne)) * (sum_bf - bf_vec[k]) + bf_vec[k]);
+			// snp level coloc prob
+			double p_coloc = prob * eqtl_vec[i].pip_vec[k];
+			double gprob_e = p_coloc;
+			eqtl_vec[i].coloc_prob += p_coloc;
+			eqtl_vec[i].locus_coloc_prob += p_coloc;
+
+			// update overall GWAS association evidence considering informative QTL prior: gprob_e
+
+			// other non-coloc possibilities
+			//  no eqtl, k-th SNP is the gwas hit
+			prob = bf_vec[k] / ((1 - pi1_ne) / pi1_ne + sum_bf);
+			gprob_e += prob * (1 - eqtl_vec[i].cpip);
+
+			// j-th SNP is the eQTL, and k-th SNP is the GWAS
+			for (int j = 0; j < eqtl_vec[i].snp_vec.size(); j++)
 			{
-				max_scp = scp_vec[k];
+				if (j == k)
+					continue;
+				prob = bf_vec[k] / (((1 - pi1_ne) / pi1_ne) + (sum_bf - bf_vec[j]) + (pi1_e / (1 - pi1_e)) * ((1 - pi1_ne) / pi1_ne) * bf_vec[j]);
+				gprob_e += prob * eqtl_vec[i].pip_vec[j];
+				eqtl_vec[i].locus_coloc_prob += prob * eqtl_vec[i].pip_vec[j];
+			}
+
+			string locus_id = eqtl_vec[i].id + "(@)" + snp2gwas_locus[snp];
+			if (p_coloc >= output_thresh)
+				fprintf(fd1, "%15s   %15s   %7.3e %7.3e    %7.3e      %7.3e\n", locus_id.c_str(), snp.c_str(), eqtl_vec[i].pip_vec[k], gprob_vec_null[k], gprob_e, p_coloc);
+			gwas_cpip += gprob_e;
+			if (p_coloc >= max_scp)
+			{
+				max_scp = p_coloc;
 				max_snp = snp;
 			}
 		}
-		
 
-		string locus_id = eqtl_vec[i].id + "(@)" + snp2gwas_locus[max_snp];
+		// lcp comp (proposed solution) -- DAP
+		int np = eqtl_vec[i].snp_vec.size();
+		double locus_bf = (1.0 / np) * (locus_gpip / (1 - locus_gpip)) / (pi1 / (1 - pi1));
+		double factor = (1 - pi1_ne) * (1 - pi1_e) / ((1 - pi1_ne) * pi1_e + (np - 1) * (1 - pi1_e) * pi1_ne);
+		double lcp = (locus_bf / (factor + locus_bf)) * locus_epip;
 
-
-		if (RCP >= output_thresh || LCP >= output_thresh)
+		if (lcp < eqtl_vec[i].coloc_prob)
 		{
-			string locus_id = eqtl_vec[i].id + "(@)" + snp2gwas_locus[max_snp];
-			fprintf(fd2, "%15s   %4d  %7.3e %7.3e    %7.3e      %7.3e\t%7.3e\n", locus_id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_cpip_m, gprob_cpip_e, RCP, LCP);
+			lcp = eqtl_vec[i].coloc_prob;
 		}
 
+		eqtl_vec[i].locus_coloc_prob = lcp;
 
+		// lcp comp done
+
+		if (eqtl_vec[i].coloc_prob >= output_thresh || eqtl_vec[i].locus_coloc_prob >= output_thresh)
+		{
+			string locus_id = eqtl_vec[i].id + "(@)" + snp2gwas_locus[max_snp];
+			fprintf(fd2, "%15s   %4d  %7.3e %7.3e    %7.3e      %7.3e\t%7.3e\n", locus_id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_null, gwas_cpip, eqtl_vec[i].coloc_prob, eqtl_vec[i].locus_coloc_prob);
+		}
 
 	}
 
@@ -838,28 +553,22 @@ void controller::compute_coloc_prob()
 vector<double> controller::run_EM(vector<int> &eqtl_sample)
 {
 
-	// starting point
 	double a0 = log(pi1 / (1 - pi1));
 	double a1 = 0;
-
 	double var0;
 	double var1;
+	double r1 = exp(a0 + a1);
+	double r0 = exp(a0);
+	double r_null = pi1 / (1 - pi1);
 
-	double r1 = exp(a0 + a1); // prior odds for eQTL
-	double r0 = exp(a0); // prior odds for non-eQTL	
-	double rm = pi1 / (1 - pi1); // marginal prior odds 
-	
 	while (1)
 	{
 		// E-step
 		double pseudo_count = 1.0;
-		double e0g0 = pseudo_count * (1 - P_gwas) * (1 - P_eqtl); 
+		double e0g0 = pseudo_count * (1 - P_gwas) * (1 - P_eqtl);
 		double e0g1 = pseudo_count * (1 - P_eqtl) * P_gwas;
 		double e1g0 = pseudo_count * (1 - P_gwas) * P_eqtl;
 		double e1g1 = pseudo_count * P_gwas * P_eqtl;
-
-		
-
 
 		for (int i = 0; i < snp_vec.size(); i++)
 		{
@@ -868,24 +577,22 @@ vector<double> controller::run_EM(vector<int> &eqtl_sample)
 			if (val == 1)
 				val = 1 - 1e-8;
 			// posterior ratio
-			val = val / (1 - val); // convert to BF
+			val = val / (1 - val);
 			// val/r_null is marginal likelihood/bayes factor
 			if (eqtl_sample[i] == 0)
 			{
-				val = r0 * (val / rm); // posterior odds
-				val = val / (1 + val); // updated posterior with current prior given eqtl = 0
-				
-				// bookkeeping
+				val = r0 * (val / r_null);
+				// updated posterior with current prior given eqtl = 0
+				val = val / (1 + val);
 				e0g1 += val;
 				e0g0 += 1 - val;
 			}
 
 			if (eqtl_sample[i] == 1)
 			{
-				val = r1 * (val / rm); // posterior odds
-				val = val / (1 + val); // updated posterior with current prior given eqtl = 1
-				
-				// bookkeeping
+				val = r1 * (val / r_null);
+				// updated posterior with current prior given eqtl = 1
+				val = val / (1 + val);
 				e1g1 += val;
 				e1g0 += 1 - val;
 			}

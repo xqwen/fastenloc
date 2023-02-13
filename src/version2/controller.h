@@ -68,7 +68,6 @@ class controller {
         void set_enrich_params(double a0, double a1);
 
         void load_eqtl(char *eqtl_file, char *tissue);
-        void load_gwas(char *gwas_file, char *tissue=0);
         void load_gwas_torus(char *gwas_file);
 
 

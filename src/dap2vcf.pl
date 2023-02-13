@@ -1,7 +1,10 @@
+#!/usr/bin/perl
 use Cwd 'abs_path';
 
 $tissue = "";
 $dir = './';
+$thresh = 0;
+
 for($i=0;$i<= $#ARGV; $i++){
     if($ARGV[$i] eq "-d" || $ARGV[$i] eq "-dir"){
         $dir = $ARGV[++$i];
@@ -13,6 +16,11 @@ for($i=0;$i<= $#ARGV; $i++){
     }
     if($ARGV[$i] eq "-t" || $ARGV[$i] eq "-tissue"){
         $tissue = $ARGV[++$i];
+        next;
+    }
+
+    if($ARGV[$i] eq "-p"){
+        $thresh = $ARGV[++$i];
         next;
     }
 
@@ -54,6 +62,7 @@ sub process_fm{
         s/\}//;
         my @data = split /\s+/, $_;
         shift @data until $data[0]=~/^\S/;
+        next if $data[2] < $thresh;
         $cluster{$data[0]} = "\[$data[2]:$data[1]\]";
     }
 
@@ -62,15 +71,15 @@ sub process_fm{
         my @data = split /\s+/, $_;
         shift @data until $data[0]=~/^\S/;
         next if $data[4] == -1;
+        next if !defined($cluster{$data[4]});
+
         next if $data[2] < 1e-4;
         my $info = "$gene:$data[4]\@$tissue\=$data[2]".$cluster{$data[4]};
-        if(!defined($snp{$data[1]})){
-            $data[1] =~ /chr(\S+)\_(\d+)\_(\S+)\_(\S+)\_b38/;
-            $map{$1}->{$2} = $data[1];
-            $snp{$data[1]}->{header} = "chr$1\t$2\t$data[1]\t$3\t$4";
-            $snp{$data[1]}->{info} = "$info";
+        $id = "$gene\_$data[1]";
+        if(!defined($snp{$id})){
+            $snp{$id}->{info} = "$info";
         }else{
-            $snp{$data[1]}->{info} .="|".$info;
+            $snp{$id}->{info} .="|".$info;
         }
 
 
