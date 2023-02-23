@@ -1,19 +1,20 @@
 # fastENLOC: fast enrichment estimation aided colocalization analysis
 
-**Current release: version 2** (April, 2022)
+**Version 3** (planned release date: April 2023)
 
 
 This repository contains the software implementation of fastENLOC, which enables integrative genetic association analysis of molecular QTL data and GWAS data. The statistical model and the key computational procedures are described in \[1\], \[2\], \[3\], and \[4\].
 
-For questions/comments regarding to the software package, please contact Xiaoquan (William) Wen (xwen at umich dot edu).
+For questions/comments regarding the software package, please contact Xiaoquan (William) Wen (xwen at umich dot edu).
 
-## New features in version 2
 
-+ Locus-level colcoalization analysis
-+ Auto diagnosis of input files
-+ Utility scripts for generating input files and computing gene-level colocalization probabilities (GLCP and GRCP). 
-+ Code optimization
-+ Bug fix
+## New features in version 3
+
+1. Unified VCF input format for both complex- and molecular-trait data
+2. Diagnosis output from multiple imputation procedure 
+3. Capping option for enrichment parameter ($a_1$) 
+4. Tutorial and documentation
+5. Utility for using fine-mapping results from other software tools (e.g., SuSiE)
 
 ## License
 
@@ -24,8 +25,8 @@ Software distributed under the terms of the GNU General Public License as publis
 
 A detailed tutorial is provided in [``tutorial``](https://github.com/xqwen/fastenloc/tree/master/tutorial/) directory. Briefly, three main steps are required for a complete analysis
 
-1. Prepare eQTL annotation
-2. Prepare GWAS sumary (in term of posterior inclusion probabilities, or PIPs)
+1. Summarize and prepare input from fine-mapping analysis of eQTL data 
+2. Summarize and prepare input from fine-mapping analysis of GWAS data
 3. Run fastenloc
 
 We distribute pre-computed eQTL annotations from GTEx (v8) data. In the simplest case, the required GWAS PIPs can be computed from single-SNP association summary-statistics (e.g., z-scores and p-values) using [``torus``](https://github.com/xqwen/torus/)
