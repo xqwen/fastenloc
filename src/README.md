@@ -1,8 +1,10 @@
-## Compile the source code
+## Quick start
 
-Run ``make`` to compile the source code in this directory. The resulting executable is named ``fastenloc``.
+### Compile the source code
 
-## Sample data download
+Run ``make`` to compile the source code in this directory. The resulting executable is named ``fastenloc``. Select the appropriate Makefile for your operating system. 
+
+### Sample data download
 
 + GTEx v8 eQTL annotation: [\[with hg38 position ID\]](https://drive.google.com/open?id=1kfH_CffxyCtZcx3z7k63rIARNidLv1_P)    [\[with rs ID\]](https://drive.google.com/open?id=1rSaHenk8xOFtQo7VuDZevRkjUz6iwuj0)
 + Height GWAS z-scores in torus format: [download](https://drive.google.com/open?id=1kxZge6NQ8_8oJjVhkO4lKdmZiG2jbu1m)
@@ -13,7 +15,7 @@ torus -d Height.torus.zval.gz --load_zval -dump_pip Height.gwas.pip
 gzip Height.gwas.pip
 ```
 
-## GWAS data input
+### GWAS data input
 
 The required GWAS input format is
 
@@ -25,7 +27,7 @@ The PIP can be generated from any Bayesian fine-mapping algorithms (DAP-G, CAVIA
 
 
 
-## Running colocalization
+### Running colocalization
 
 Command line syntax
 
@@ -37,7 +39,7 @@ For example to run colocalization analysis of Height GWAS and GTEx (v8) whole bl
 fastenloc -e gtex_v8.eqtl_annot.vcf.gz -g Height.gwas.pip -t Whole_Blood -prefix Height_Blood
 ```
 
-### Command line arguments
+#### Command line arguments
 
 + ```-e eqtl_input``` (required): specify the eQTL annotation input file.
                                   
@@ -59,7 +61,7 @@ fastenloc -e gtex_v8.eqtl_annot.vcf.gz -g Height.gwas.pip -t Whole_Blood -prefix
                                                                
 
 
-## Output
+### Output
 
 1. Enrichment analysis result ``prefix.enloc.enrich.rst``: estimated enrichment parameters and standard errors. If shrinkage parameter is non-zero, both the unshrunk and the shrunk enrichment estimates will be output. Note that, only the shrunk estimate will be used in the colocalization computation.
 2. Signal-level colocalization result ``prefix.enloc.sig.out``:  the main output from the colocalization analysis with the following format

@@ -9,8 +9,8 @@
 int show_banner(){
 
     fprintf(stderr, "\t\t==================================================================\n\n");
-    fprintf(stderr, "\t\t                     fastENLOC (v2.0)                        \n\n");
-    fprintf(stderr, "\t\t                        April, 2022                              \n\n"); 
+    fprintf(stderr, "\t\t                     fastENLOC (v3.0)                        \n\n");
+    fprintf(stderr, "\t\t                        April, 2023                              \n\n"); 
     fprintf(stderr, "\t\t==================================================================\n\n\n");
     return 1;
 }
@@ -43,6 +43,8 @@ int main(int argc, char **argv){
     double p1 = UNDEF;
     double p2 = UNDEF;
     double p12 = UNDEF;
+    
+    double cap_a1 = 9e10;
 
     double output_thresh = 1e-4;
 
@@ -113,6 +115,10 @@ int main(int argc, char **argv){
             continue;
         }
 
+        if(strcmp(argv[i], "-cap_a1")==0){
+            cap_a1 = atof(argv[++i]);
+            continue;
+        }
 
         if(strcmp(argv[i], "-p1")==0){
             p1 = atof(argv[++i]);

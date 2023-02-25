@@ -570,6 +570,14 @@ void controller::set_enrich_params(double p1, double p2, double p12)
 	set_enrich_params(a0, a1);
 }
 
+
+
+
+
+///////////// computing various colocalization probabilities ////////////////////
+
+
+
 void controller::compute_coloc_prob()
 {
 
@@ -604,8 +612,6 @@ void controller::compute_coloc_prob()
 		for (int k = 0; k < p; k++)
 		{
 			string snp = eqtl_vec[i].snp_vec[k];
-			//double d = 1e-10;
-			//if(snp_index.find(snp) != snp_index.end())
 			double d = gwas_pip_vec[snp_index[snp]];
 			gprob_vec_m.push_back(d);
 			gprob_cpip_m += d;
@@ -624,14 +630,19 @@ void controller::compute_coloc_prob()
 		}
 
 		double locus_epip = 0;
-	
+
 	    // recovering GWAS BFs from fine-mapping results
+		// Important: the contrast is the scenario that all SNPs in the cluster has zero effects 
+		// The procedure is based on DAP-1 approximation
+		
+		double log10_MNC = log10(1-pi1) - log10(1-gprob_cpip_m);
 		for (int k = 0; k < p; k++)
 		{
 			double gpost = gprob_vec_m[k];
+		
 			if(gpost == 0)
 				gpost = 1e-10;
-			double log10bf = log10(gpost/(1-gpost)) - log10(r_m); // bf = posterior_odds/prior_odds
+			double log10bf = log10(gpost) - log10(pi1) + log10_MNC;
 			glog10bf_vec.push_back(log10bf);
 			locus_epip += eqtl_vec[i].pip_vec[k];
 		}
@@ -639,10 +650,15 @@ void controller::compute_coloc_prob()
 			locus_epip = 1 - 1e-8;
 
 		// computing p(d,r | E, G) by considering all configureations within a single signal cluster (DAP-1 approximation for both traits)
+		
+		
+
 
 		double NC = 0;
+
         // case 1: null-null scenario
 		NC += pow(10, p*log10(1-pi1_ne)+log10(1-locus_epip));
+
 		// case 2: gwas only-eqtl null 
 		vector<double> g_only_prob_vec;
 		for (int k=0;k<p; k++)
@@ -726,6 +742,9 @@ void controller::compute_coloc_prob()
 
 			gprob_cpip_e += gprob_e;
 		}
+
+
+
 
 		/*
 		// Alternative computation of RCP anf gprob_e based on Wen et al. 2016 (it gives similar results but needs to extend to LCP cases)
