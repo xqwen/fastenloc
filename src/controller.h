@@ -34,7 +34,9 @@ class controller {
         
         double a0_est;
         double a1_est;
-        
+
+        double cap_a1;        
+
         // for enrichment prior
         double prior_variance;
         double P_eqtl;
@@ -45,6 +47,10 @@ class controller {
 
 
     public:
+
+        void set_a1_cap(double cap){
+            cap_a1 = cap;
+        }
 
         void set_imp_num(int imp){
             ImpN = imp;

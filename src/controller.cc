@@ -545,7 +545,7 @@ void controller::enrich_est()
 	// printf("%7.3e  %7.3e     %7.3e\n", pi1_e, pi1_ne, pi1);
 
 	fprintf(stderr, "\nEnrichment analysis is completed\n");
-	fprintf(stderr, "pi1 = %7.3e  pi1_e = %7.3e pi1_ne = %7.3e\np_eqtl = %7.3e\n", pi1, pi1_e, pi1_ne, P_eqtl);
+	// fprintf(stderr, "pi1 = %7.3e  pi1_e = %7.3e pi1_ne = %7.3e\np_eqtl = %7.3e\n", pi1, pi1_e, pi1_ne, P_eqtl);
 
 	gsl_rng_free(r);
 	return;
@@ -553,7 +553,10 @@ void controller::enrich_est()
 
 void controller::set_enrich_params(double a0, double a1)
 {
-
+	if(a1 > cap_a1){
+		fprintf(stderr, "\n\n*** estimated a1 (%.3f) exceeds the user-specified cap value, set a1 = %.3f ***\n", a1, cap_a1);
+		a1 = cap_a1;
+	}
 	pi1_e = exp(a0 + a1) / (1 + exp(a0 + a1));
 	pi1_ne = exp(a0) / (1 + exp(a0));
 }

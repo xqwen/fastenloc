@@ -44,7 +44,7 @@ int main(int argc, char **argv){
     double p2 = UNDEF;
     double p12 = UNDEF;
     
-    double cap_a1 = 9e10;
+    double cap_a1 = -UNDEF;
 
     double output_thresh = 1e-4;
 
@@ -231,6 +231,7 @@ int main(int argc, char **argv){
 
     controller con;
 
+    con.set_a1_cap(cap_a1);
     con.set_imp_num(ImpN);
     con.set_snp_size(total_snp);
     con.set_thread(nthread);
