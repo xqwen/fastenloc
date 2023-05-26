@@ -476,59 +476,75 @@ void controller::enrich_est()
 
 	a0_est = 0;
 	a1_est = 0;
+	double a1_shrink_est =0;
+	double var1_shrink = 0;
 
 	double var0 = 0;
 	double var1 = 0;
+	vector<double> a1_shrink_vec;
+	vector<double> v1_shrink_vec;
 	for (int k = 0; k < ImpN; k++)
 	{
 		a0_est += a0_vec[k];
 		a1_est += a1_vec[k];
 		var0 += v0_vec[k];
 		var1 += v1_vec[k];
+
+		double post_var = 1.0 / (1.0 / prior_variance + 1 / (v1_vec[k]));
+		double post_a1 = (a1_vec[k] * prior_variance) / (prior_variance + v1_vec[k]);
+
+		a1_shrink_vec.push_back(post_a1);
+		v1_shrink_vec.push_back(post_var);
+		a1_shrink_est += post_a1;
+		var1_shrink += post_var;
+
 		double p_eqtl_mi = eqtl_sample_vec[k]/total_snp;
 		double p_gwas_mi = p_eqtl_mi*exp(a0_vec[k]+a1_vec[k])/(1+exp(a0_vec[k]+a1_vec[k])) + (1-p_eqtl_mi)*exp(a0_vec[k])/(1+exp(a0_vec[k]));  
-		fprintf(fd_mi, "%7.3f\t%7.3f\t\t%7.3e\t%7.3e\n", a0_vec[k], a1_vec[k],p_eqtl_mi, p_gwas_mi);
+
+		fprintf(fd_mi, "%7.3f\t%7.3f\t\t%7.3e\t%7.3e\n", a0_vec[k], a1_shrink_vec[k],p_eqtl_mi, p_gwas_mi);
 	}
 
 	fclose(fd_mi);
 	a0_est = a0_est / ImpN;
 	a1_est = a1_est / ImpN;
+	a1_shrink_est = a1_shrink_est / ImpN;
+
 
 	double bv0 = 0;
 	double bv1 = 0;
+	double bv1_shrink = 0;
 	for (int k = 0; k < ImpN; k++)
 	{
 
 		bv0 += pow(a0_vec[k] - a0_est, 2);
 		bv1 += pow(a1_vec[k] - a1_est, 2);
+		bv1_shrink += pow(a1_shrink_vec[k] - a1_shrink_est, 2);
 	}
 
 	bv0 = bv0 / (ImpN - 1);
 	bv1 = bv1 / (ImpN - 1);
+	bv1_shrink = bv1_shrink / (ImpN-1);
 	var0 = var0 / ImpN;
 	var1 = var1 / ImpN;
+	var1_shrink = var1_shrink / ImpN;
 
 	double sd0 = sqrt(var0 + bv0 * (ImpN + 1) / ImpN);
 	double sd1 = sqrt(var1 + bv1 * (ImpN + 1) / ImpN);
+	double sd1_shrink = sqrt(var1_shrink + bv1_shrink * (ImpN+1) / ImpN );
 
-	double a1_est_ns = a1_est;
-	double sd1_ns = sd1;
 
-	// apply shrinkage
-	if (prior_variance > 0)
-	{
-		double post_var = 1.0 / (1.0 / prior_variance + 1 / (sd1 * sd1));
-		a1_est = (a1_est_ns * prior_variance) / (prior_variance + sd1_ns * sd1_ns);
-		sd1 = sqrt(post_var);
-	}
 
 	a0_est = log(P_gwas / (1 + P_eqtl * exp(a1_est) - P_eqtl - P_gwas));
 
 	string enrich_file = prefix + string("enloc.enrich.out");
 	FILE *fd = fopen(enrich_file.c_str(), "w");
 	fprintf(fd, "%25s   %7.3f     %7s\n", "Intercept", a0_est, "-");
-	fprintf(fd, "%25s   %7.3f     %7.3f\n", "Enrichment (no shrinkage)", a1_est_ns, sd1_ns);
-	fprintf(fd, "%25s   %7.3f     %7.3f\n", "Enrichment (w/ shrinkage)", a1_est, sd1);
+	fprintf(fd, "%25s   %7.3f     %7.3f\n", "Enrichment (no shrinkage)", a1_est, sd1);
+	fprintf(fd, "%25s   %7.3f     %7.3f\n", "Enrichment (w/ shrinkage)", a1_shrink_est, sd1_shrink);
+
+	// use shrinkage estimate 
+	a1_est = a1_shrink_est;
+
 
 	double p1 = (1-P_eqtl)* exp(a0_est)/(1+exp(a0_est));
 	double p2 = P_eqtl/(1+exp(a0_est+a1_est));
