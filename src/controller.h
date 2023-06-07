@@ -25,6 +25,8 @@ class controller {
 
         int ImpN;
         int nthread;
+
+        int outlier_control;
         
         int total_snp;
 
@@ -58,6 +60,11 @@ class controller {
 
         void set_snp_size(int size){
             total_snp = size;
+        }
+
+
+        void set_outlier_control(int control){
+            outlier_control = control;
         }
 
         void set_prior_variance (double pv){

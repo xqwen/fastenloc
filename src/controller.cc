@@ -469,14 +469,74 @@ void controller::enrich_est()
 		fprintf(stderr, "Imputation round %2d is completed\n", k + 1);
 	}
 
+	// MI post-processing
 
-    string mi_file = prefix + string("enloc.mi.out");
+
+	// Detect and remove outliers from MI results
+	if (outlier_control)
+	{
+
+
+		vector<double> a1_shrink_temp_vec;
+		double mean = 0;
+		double sd = 0;
+		for (int k = 0; k < ImpN; k++)
+		{
+			double post_a1 = (a1_vec[k] * prior_variance) / (prior_variance + v1_vec[k]);
+			a1_shrink_temp_vec.push_back(post_a1);
+			mean += post_a1;
+			sd += pow(post_a1, 2);
+		}
+
+		mean = mean/ImpN;
+		sd = sqrt(sd/ImpN - pow(mean, 2));
+
+		int remove_count = 0;
+		vector<double> a0_vec_temp;
+		vector<double> a1_vec_temp;
+		vector<double> v0_vec_temp;
+		vector<double> v1_vec_temp;
+
+		for (int k = 0; k < ImpN; k++)
+		{
+			double dist = fabs(a1_shrink_temp_vec[k] - mean) / sd;
+			if (dist > 3)
+			{
+				remove_count++;
+				continue;
+			}else{
+
+				a1_vec_temp.push_back(a1_vec[k]);
+				v1_vec_temp.push_back(v1_vec[k]);
+				a0_vec_temp.push_back(a0_vec[k]);
+				v0_vec_temp.push_back(v0_vec[k]);
+			}
+		}
+
+		if (remove_count > 0)
+		{
+
+			fprintf(stderr, "\n*** %d outlying MI results removed ***\n", remove_count);
+			ImpN -= remove_count;
+
+			a1_vec = a1_vec_temp;
+			a0_vec = a0_vec_temp;
+			v1_vec = v1_vec_temp;
+			v0_vec = v0_vec_temp;
+		}
+	}
+
+
+	fprintf(stderr, "\nEffective MI numbers: %d", ImpN);
+	// main processing
+
+	string mi_file = prefix + string("enloc.mi.out");
 	FILE *fd_mi = fopen(mi_file.c_str(), "w");
-	fprintf(fd_mi, "%7s\t%7s\t%7s\t%7s\n","a0", "a1", "p_eqtl", "p_gwas");
+	fprintf(fd_mi, "%7s\t%7s\t%7s\t%7s\n", "a0", "a1", "p_eqtl", "p_gwas");
 
 	a0_est = 0;
 	a1_est = 0;
-	double a1_shrink_est =0;
+	double a1_shrink_est = 0;
 	double var1_shrink = 0;
 
 	double var0 = 0;
@@ -498,10 +558,10 @@ void controller::enrich_est()
 		a1_shrink_est += post_a1;
 		var1_shrink += post_var;
 
-		double p_eqtl_mi = eqtl_sample_vec[k]/total_snp;
-		double p_gwas_mi = p_eqtl_mi*exp(a0_vec[k]+a1_vec[k])/(1+exp(a0_vec[k]+a1_vec[k])) + (1-p_eqtl_mi)*exp(a0_vec[k])/(1+exp(a0_vec[k]));  
+		double p_eqtl_mi = eqtl_sample_vec[k] / total_snp;
+		double p_gwas_mi = p_eqtl_mi * exp(a0_vec[k] + a1_vec[k]) / (1 + exp(a0_vec[k] + a1_vec[k])) + (1 - p_eqtl_mi) * exp(a0_vec[k]) / (1 + exp(a0_vec[k]));
 
-		fprintf(fd_mi, "%7.3f\t%7.3f\t\t%7.3e\t%7.3e\n", a0_vec[k], a1_shrink_vec[k],p_eqtl_mi, p_gwas_mi);
+		fprintf(fd_mi, "%7.3f\t%7.3f\t\t%7.3e\t%7.3e\n", a0_vec[k], a1_shrink_vec[k], p_eqtl_mi, p_gwas_mi);
 	}
 
 	fclose(fd_mi);
@@ -509,10 +569,10 @@ void controller::enrich_est()
 	a1_est = a1_est / ImpN;
 	a1_shrink_est = a1_shrink_est / ImpN;
 
-
 	double bv0 = 0;
 	double bv1 = 0;
 	double bv1_shrink = 0;
+
 	for (int k = 0; k < ImpN; k++)
 	{
 
@@ -523,14 +583,14 @@ void controller::enrich_est()
 
 	bv0 = bv0 / (ImpN - 1);
 	bv1 = bv1 / (ImpN - 1);
-	bv1_shrink = bv1_shrink / (ImpN-1);
+	bv1_shrink = bv1_shrink / (ImpN - 1);
 	var0 = var0 / ImpN;
 	var1 = var1 / ImpN;
 	var1_shrink = var1_shrink / ImpN;
 
 	double sd0 = sqrt(var0 + bv0 * (ImpN + 1) / ImpN);
 	double sd1 = sqrt(var1 + bv1 * (ImpN + 1) / ImpN);
-	double sd1_shrink = sqrt(var1_shrink + bv1_shrink * (ImpN+1) / ImpN );
+	double sd1_shrink = sqrt(var1_shrink + bv1_shrink * (ImpN + 1) / ImpN);
 
 	a0_est = log(P_gwas / (1 + P_eqtl * exp(a1_est) - P_eqtl - P_gwas));
 
@@ -687,7 +747,7 @@ void controller::compute_coloc_prob()
 		}
 
 		// case 4: gwas-eqtl combination
-		vector<vector<double>> coloc_config; // coloc_config[m][n] indicates m-th SNP is the GWAS hit and n-th SNP is the causal eQTL
+		vector<vector<double> > coloc_config; // coloc_config[m][n] indicates m-th SNP is the GWAS hit and n-th SNP is the causal eQTL
 		// initialization
 		for (int k = 0; k < p; k++)
 		{

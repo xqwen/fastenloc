@@ -37,6 +37,8 @@ int main(int argc, char **argv){
     int set_enrich_p = 0;
     int set_enrich_a = 0;
 
+    int outlier_control = 1;
+
     double a0 = UNDEF;
     double a1 = UNDEF;
 
@@ -237,6 +239,7 @@ int main(int argc, char **argv){
     con.set_thread(nthread);
     con.set_prefix(prefix);
     con.set_output_thresh(output_thresh);
+    con.set_outlier_control(outlier_control);
 
     // default shrinkage
     double pv = 1;
