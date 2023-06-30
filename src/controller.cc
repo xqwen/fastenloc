@@ -432,6 +432,12 @@ void controller::enrich_est()
     gsl_rng_env_setup();
     T = gsl_rng_default;
     r = gsl_rng_alloc(T);
+    
+    if(seed != 0)
+    {
+        gsl_rng_set(r, seed);
+        fprintf(stderr, "Use user-specified random seed: %lu\n\n", seed);
+    }
 
     vector<double> a0_vec = vector<double>(ImpN, 0.0);
     vector<double> v0_vec = vector<double>(ImpN, 0.0);

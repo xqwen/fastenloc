@@ -62,6 +62,8 @@ int main(int argc, char **argv){
     int gwas_format = 1;
     int coloc_prob_option = 2;  // default using exact algorithm
 
+    unsigned long random_seed = 0;
+
     show_banner();
 
     for(int i=1;i<argc;i++){
@@ -139,6 +141,11 @@ int main(int argc, char **argv){
 
         if(strcmp(argv[i], "-prefix")==0){
             strcpy(prefix,argv[++i]);
+            continue;
+        }
+        
+        if(strcmp(argv[i], "-seed")==0){
+            random_seed = (unsigned long)atoi(argv[++i]);
             continue;
         }
         
@@ -256,6 +263,7 @@ int main(int argc, char **argv){
     con.set_a1_cap(cap_a1);
     con.set_imp_num(ImpN);
     con.set_snp_size(total_snp);
+    con.set_random_seed(random_seed);
     con.set_thread(nthread);
     con.set_prefix(prefix);
     con.set_output_thresh(output_thresh);
