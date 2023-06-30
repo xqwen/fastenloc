@@ -47,8 +47,15 @@ class controller {
         // threshold value to output signal/snp coloc probs
         double output_thresh;
 
+        int coloc_prob_option;
+
 
     public:
+
+
+        void set_coloc_prob_option(int option){
+            coloc_prob_option = option;
+        }
 
         void set_a1_cap(double cap){
             cap_a1 = cap;
@@ -91,6 +98,12 @@ class controller {
 
         void enrich_est();
         void compute_coloc_prob();
+
+    private:
+
+        void compute_coloc_prob_exact();
+        void compute_coloc_prob_default();
+
 
     private:
 

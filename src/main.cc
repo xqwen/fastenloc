@@ -10,7 +10,7 @@ int show_banner(){
 
     fprintf(stderr, "\t\t==================================================================\n\n");
     fprintf(stderr, "\t\t                     fastENLOC (v3.0)                        \n\n");
-    fprintf(stderr, "\t\t                        April, 2023                              \n\n"); 
+    fprintf(stderr, "\t\t                        July, 2023                              \n\n"); 
     fprintf(stderr, "\t\t==================================================================\n\n\n");
     return 1;
 }
@@ -60,6 +60,7 @@ int main(int argc, char **argv){
     int set_error = 0;
 
     int gwas_format = 1;
+    int coloc_prob_option = 2;  // default using exact algorithm
 
     show_banner();
 
@@ -145,6 +146,25 @@ int main(int argc, char **argv){
             output_thresh = 0;
             continue;
         }
+
+        if(strcmp(argv[i], "--approx")==0 || strcmp(argv[i], "--apprx") ==0 ){
+            coloc_prob_option = 1;
+            continue;
+        }
+
+        if(strcmp(argv[i], "--exact")==0 ){
+            coloc_prob_option = 2;
+            continue;
+        }
+
+        if(strcmp(argv[i], "--default")==0 || strcmp(argv[i], "--approx")==0 ){
+            coloc_prob_option = 1;
+            continue;
+        }
+
+
+
+
 
         if(strcmp(argv[i], "--est")==0 || strcmp(argv[i], "--est_only")==0 || strcmp(argv[i], "--enrich")==0 || strcmp(argv[i], "--enrich_only")==0){
             enrich_est_only = 1;
@@ -264,6 +284,9 @@ int main(int argc, char **argv){
 
 
     con.load_eqtl(eqtl_file, tissue);
+
+    con.set_coloc_prob_option(coloc_prob_option);
+
 
     if(gwas_format == 1)
         con.load_gwas(gwas_file);
