@@ -97,6 +97,8 @@ public:
 
     void load_eqtl(char *eqtl_file, char *tissue);
     void load_gwas(char *gwas_file, char *tissue = 0);
+    void load_eqtl_summary(char *eqtl_file, char *tissue);
+
     void load_gwas_torus(char *gwas_file);
 
     void set_output_thresh(double value)
@@ -110,6 +112,8 @@ public:
 private:
     void compute_coloc_prob_exact();
     void compute_coloc_prob_default();
+
+    vector<string> readLines(const string& filename); 
 
 private:
     vector<double> run_EM(vector<int> &eqtl_sample);

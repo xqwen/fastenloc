@@ -4,47 +4,25 @@
 #include <fstream>
 #include <sstream>
 #include <string.h>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
 #include <gsl/gsl_rng.h>
 #include <math.h>
 #include <omp.h>
-
-
-
-
+#include <zlib.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////// Input Processing ///////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+///// eQTL with fine-mapping information
 
 void controller::load_eqtl(char *eqtl_file, char *tissue)
 {
 
     fprintf(stderr, "Processing eQTL annotations ... \n");
-    ifstream dfile(eqtl_file, ios_base::in | ios_base::binary);
-    if (dfile.fail())
-    {
-        fprintf(stderr, "\nError: can't open eQTL annotation file \"%s\". \n\n ", eqtl_file);
-        exit(1);
-    }
-    boost::iostreams::filtering_istream in;
 
-    in.push(boost::iostreams::gzip_decompressor());
-    if (in.fail())
-    {
-        fprintf(stderr, "\nError: fail to decompress eQTL annotation file \"%s\", please check the file format.\n\n", eqtl_file);
-        exit(1);
-    }
-    in.push(dfile);
-
-    string line;
     istringstream ins;
 
     string target_tissue = string(tissue);
-
     string chr;
     string pos;
     string snp_id; // important
@@ -55,9 +33,13 @@ void controller::load_eqtl(char *eqtl_file, char *tissue)
     string delim = "|";
 
     int format_status = 0;
-    while (getline(in, line))
+
+    vector<string> lines = readLines(string(eqtl_file));
+
+    for (vector<string>::iterator it = lines.begin(); it != lines.end(); ++it) 
     {
 
+        string line = *it;
         ins.clear();
         ins.str(line);
 
@@ -147,29 +129,122 @@ void controller::load_eqtl(char *eqtl_file, char *tissue)
     P_eqtl = sum;
 }
 
+void controller::load_eqtl_summary(char *eqtl_file, char *tissue)
+{
 
+    fprintf(stderr, "Processing eQTL annotations (summary statistics)... \n");
+
+    istringstream ins;
+
+    string target_tissue = string(tissue);
+
+    string chr;
+    string pos;
+    string snp_id; // important
+    string allele1;
+    string allele2;
+    string content;
+
+    string delim = "|";
+
+    int format_status = 0;
+
+    vector<string> lines = readLines(string(eqtl_file));
+    for (vector<string>::iterator it = lines.begin(); it != lines.end(); ++it) 
+    {
+
+        string line = *it;
+
+        ins.clear();
+        ins.str(line);
+
+        if (ins >> chr >> pos >> snp_id >> allele1 >> allele2 >> content)
+        {
+
+            format_status = 1;
+
+            // passing content
+            size_t pos = 0;
+            string token;
+
+            do
+            {
+                pos = content.find(delim);
+                token = content.substr(0, pos);
+                size_t pos1 = token.find("@");
+                size_t pos2 = token.find("=");
+                size_t pos3 = token.find("(");
+                size_t pos4 = token.find(")");
+                string sig_id;
+                string tissue_type;
+                if (pos1 != string::npos && pos2 - pos1 > 1)
+                {
+                    tissue_type = token.substr(pos1 + 1, pos2 - pos1 - 1);
+                }
+
+                sig_id = token.substr(0, pos1);
+
+                // printf("sig id = %s %d %d\n",sig_id.c_str(),pos2,pos1);
+                string bhat = token.substr(pos2 + 1, pos3 - pos2 - 1);
+                string se = token.substr(pos3 + 1, pos4 - pos3 - 1);
+                // processing
+
+                if (strlen(tissue) == 0 || tissue_type.compare(target_tissue) == 0)
+                {
+
+                    if (snp_index.find(snp_id) == snp_index.end())
+                    {
+                        snp_index[snp_id] = snp_vec.size();
+                        snp_vec.push_back(snp_id);
+                    }
+
+                    if (eqtl_sig_index.find(sig_id) == eqtl_sig_index.end())
+                    {
+                        eqtl_sig_index[sig_id] = eqtl_vec.size();
+                        sigCluster cluster;
+                        cluster.id = sig_id;
+                        cluster.cpip = 0;
+                        eqtl_vec.push_back(cluster);
+                    }
+
+                    int index = eqtl_sig_index[sig_id];
+
+                    // std::cout << snp_id<< "    "<< sig_id<<"  "<< tissue_type<<"   "<< pip << " "<< sig_pip<< std::endl;
+                }
+
+                content.erase(0, pos + delim.length());
+            } while (pos != string::npos);
+        }
+    }
+
+    if (format_status == 0)
+    {
+        fprintf(stderr, "\nError: unexpected format in eQTL annotation file \"%s\".\n\n", eqtl_file);
+        exit(1);
+    }
+
+    double sum = 0;
+    for (int i = 0; i < eqtl_vec.size(); i++)
+    {
+        sum += eqtl_vec[i].cpip;
+    }
+
+    if (sum == 0)
+    {
+        fprintf(stderr, "\nError: no eQTL annotated in \"%s\". \n\n", eqtl_file);
+        exit(1);
+    }
+
+    fprintf(stderr, "read in %d SNPs, %d eQTL signal clusters, %.1f expected eQTLs\n\n", int(snp_vec.size()), int(eqtl_vec.size()), sum);
+
+    P_eqtl = sum;
+}
 
 void controller::load_gwas(char *gwas_file, char *tissue)
 {
 
     fprintf(stderr, "Processing complex trait data ... \n");
-    ifstream dfile(gwas_file, ios_base::in | ios_base::binary);
-    if (dfile.fail())
-    {
-        fprintf(stderr, "\nError: can't open complex trait file \"%s\". \n\n ", gwas_file);
-        exit(1);
-    }
-    boost::iostreams::filtering_istream in;
 
-    in.push(boost::iostreams::gzip_decompressor());
-    if (in.fail())
-    {
-        fprintf(stderr, "\nError: can't decompress complex trait file \"%s\". \n\n ", gwas_file);
-        exit(1);
-    }
-    in.push(dfile);
-
-    string line;
     istringstream ins;
 
     string chr;
@@ -185,13 +260,15 @@ void controller::load_gwas(char *gwas_file, char *tissue)
     int gwas_count = 0;
     int format_status = 0;
 
-    while (getline(in, line))
+    vector<string> lines = readLines(string(gwas_file));
+    for (vector<string>::iterator it = lines.begin(); it != lines.end(); ++it) 
     {
 
+        string line = *it;
         ins.clear();
         ins.str(line);
 
-        if (ins >> chr >> pos >> snp_id >> allele1 >> allele2>> content)
+        if (ins >> chr >> pos >> snp_id >> allele1 >> allele2 >> content)
         {
             format_status = 1;
             // passing content
@@ -220,7 +297,7 @@ void controller::load_gwas(char *gwas_file, char *tissue)
                 string sig_pip = token.substr(pos3 + 1, pos4 - pos3 - 1);
                 // processing
 
-                // 
+                //
 
                 if (snp_index.find(snp_id) == snp_index.end())
                 {
@@ -228,7 +305,7 @@ void controller::load_gwas(char *gwas_file, char *tissue)
                     snp_vec.push_back(snp_id);
                 }
 
-                // new GWAS locus 
+                // new GWAS locus
                 if (snp2gwas_locus.find(snp_id) == snp2gwas_locus.end())
                 {
                     snp2gwas_locus[snp_id] = sig_id;
@@ -255,10 +332,8 @@ void controller::load_gwas(char *gwas_file, char *tissue)
                 gwas_sum += val;
                 gwas_count++;
 
-
                 content.erase(0, pos + delim.length());
             } while (pos != string::npos);
-
         }
     }
     if (format_status == 0)
@@ -296,32 +371,13 @@ void controller::load_gwas(char *gwas_file, char *tissue)
     P_eqtl = P_eqtl / total_snp;
 }
 
-
-
-
-// legacy GWAS format 
+// legacy GWAS format
 
 void controller::load_gwas_torus(char *gwas_file)
 {
 
     fprintf(stderr, "Processing complex trait data ... \n");
-    ifstream dfile(gwas_file, ios_base::in | ios_base::binary);
-    if (dfile.fail())
-    {
-        fprintf(stderr, "\nError: can't open complex trait file \"%s\". \n\n ", gwas_file);
-        exit(1);
-    }
-    boost::iostreams::filtering_istream in;
 
-    in.push(boost::iostreams::gzip_decompressor());
-    if (in.fail())
-    {
-        fprintf(stderr, "\nError: can't decompress complex trait file \"%s\". \n\n ", gwas_file);
-        exit(1);
-    }
-    in.push(dfile);
-
-    string line;
     istringstream ins;
 
     string snp_id; // important
@@ -334,9 +390,11 @@ void controller::load_gwas_torus(char *gwas_file)
     double gwas_sum = 0;
     int gwas_count = 0;
     int format_status = 0;
-    while (getline(in, line))
-    {
 
+    vector<string> lines = readLines(string(gwas_file));
+    for (vector<string>::iterator it = lines.begin(); it != lines.end(); ++it) 
+    {
+        string line = *it;
         ins.clear();
         ins.str(line);
 
@@ -411,18 +469,9 @@ void controller::load_gwas_torus(char *gwas_file)
     P_eqtl = P_eqtl / total_snp;
 }
 
-
-
-
-
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////// Enrichment Estimation //////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
 
 void controller::enrich_est()
 {
@@ -432,8 +481,8 @@ void controller::enrich_est()
     gsl_rng_env_setup();
     T = gsl_rng_default;
     r = gsl_rng_alloc(T);
-    
-    if(seed != 0)
+
+    if (seed != 0)
     {
         gsl_rng_set(r, seed);
         fprintf(stderr, "Use user-specified random seed: %lu\n\n", seed);
@@ -477,11 +526,9 @@ void controller::enrich_est()
 
     // MI post-processing
 
-
     // Detect and remove outliers from MI results
     if (outlier_control)
     {
-
 
         vector<double> a1_shrink_temp_vec;
         double mean = 0;
@@ -494,8 +541,8 @@ void controller::enrich_est()
             sd += pow(post_a1, 2);
         }
 
-        mean = mean/ImpN;
-        sd = sqrt(sd/ImpN - pow(mean, 2));
+        mean = mean / ImpN;
+        sd = sqrt(sd / ImpN - pow(mean, 2));
 
         int remove_count = 0;
         vector<double> a0_vec_temp;
@@ -510,7 +557,9 @@ void controller::enrich_est()
             {
                 remove_count++;
                 continue;
-            }else{
+            }
+            else
+            {
 
                 a1_vec_temp.push_back(a1_vec[k]);
                 v1_vec_temp.push_back(v1_vec[k]);
@@ -531,7 +580,6 @@ void controller::enrich_est()
             v0_vec = v0_vec_temp;
         }
     }
-
 
     fprintf(stderr, "\nEffective MI numbers: %d", ImpN);
     // main processing
@@ -668,8 +716,8 @@ vector<double> controller::run_EM(vector<int> &eqtl_sample)
     double var0;
     double var1;
 
-    double r1 = exp(a0 + a1);	 // prior odds for eQTL
-    double r0 = exp(a0);		 // prior odds for non-eQTL
+    double r1 = exp(a0 + a1);    // prior odds for eQTL
+    double r0 = exp(a0);         // prior odds for non-eQTL
     double rm = pi1 / (1 - pi1); // marginal prior odds
 
     while (1)
@@ -752,14 +800,13 @@ void controller::set_prefix(char *str)
     }
 }
 
-void controller::compute_coloc_prob(){
+void controller::compute_coloc_prob()
+{
 
-    if(coloc_prob_option == 1)
+    if (coloc_prob_option == 1)
         compute_coloc_prob_default();
-    if(coloc_prob_option == 2)
+    if (coloc_prob_option == 2)
         compute_coloc_prob_exact();
-
-
 }
 
 // default computation (making same assumptions as imputation procedures) first implemented in version 1 & 2
@@ -781,7 +828,7 @@ void controller::compute_coloc_prob_default()
     fprintf(fd2, "Signal\tNum_SNP\tCPIP_qtl\tCPIP_gwas_marginal\tCPIP_gwas_qtl_prior\tRCP\tLCP\n");
     fprintf(fd3, "Gene\t\tGRCP\tGLCP\n");
 
-    double r_m = pi1 / (1 - pi1);  // marginal prior w/ considering QTL status
+    double r_m = pi1 / (1 - pi1); // marginal prior w/ considering QTL status
     double r1 = pi1_e / (1 - pi1_e);
     double r0 = pi1_ne / (1 - pi1_ne);
 
@@ -829,13 +876,7 @@ void controller::compute_coloc_prob_default()
             bf_vec.push_back(bf);
         }
 
-
-
-        // check bf_vec values with exact method 
-
-
-
-
+        // check bf_vec values with exact method
 
         double gwas_cpip = 0;
         double max_scp = 0;
@@ -856,7 +897,6 @@ void controller::compute_coloc_prob_default()
             eqtl_vec[i].coloc_prob += p_coloc;
             eqtl_vec[i].locus_coloc_prob += p_coloc;
 
-    
             // Scenario 2: No eQTLs, single GWAS hit in the cluster
 
             prob = bf_vec[k] / ((1 - pi1_ne) / pi1_ne + sum_bf);
@@ -888,10 +928,7 @@ void controller::compute_coloc_prob_default()
             string locus_id = eqtl_vec[i].id + "(@)" + snp2gwas_locus[max_snp];
             fprintf(fd2, "%15s   %4d  %7.3e %7.3e    %7.3e      %7.3e\t%7.3e\n", locus_id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_m, gwas_cpip, eqtl_vec[i].coloc_prob, eqtl_vec[i].locus_coloc_prob);
         }
-
     }
-
-
 
     // gene-level quantification
     map<string, double> GLCP;
@@ -901,25 +938,23 @@ void controller::compute_coloc_prob_default()
     {
         string loc_id = eqtl_vec[i].id;
         int pos = loc_id.find(":");
-        string gene_id = loc_id.substr(0,pos);
-        if(GLCP.find(gene_id)==GLCP.end()){
+        string gene_id = loc_id.substr(0, pos);
+        if (GLCP.find(gene_id) == GLCP.end())
+        {
             GLCP[gene_id] = 1;
             GRCP[gene_id] = 1;
         }
 
-        GLCP[gene_id] *= (1-eqtl_vec[i].locus_coloc_prob);
-        GRCP[gene_id] *= (1-eqtl_vec[i].coloc_prob);
-
+        GLCP[gene_id] *= (1 - eqtl_vec[i].locus_coloc_prob);
+        GRCP[gene_id] *= (1 - eqtl_vec[i].coloc_prob);
     }
 
-
-
-    std::map<string, double>::iterator it = GRCP.begin();
+    map<string, double>::iterator it = GRCP.begin();
     while (it != GRCP.end())
     {
         string gene = it->first;
         double v1 = 1 - it->second;
-        double v2 = 1- GLCP[gene];
+        double v2 = 1 - GLCP[gene];
         fprintf(fd3, "%s\t\t%7.3e\t%7.3e\n", gene.c_str(), v1, v2);
         it++;
     }
@@ -929,11 +964,7 @@ void controller::compute_coloc_prob_default()
     fclose(fd3);
 }
 
-
-
-
 // exact computation implemented in version 3
-
 
 void controller::compute_coloc_prob_exact()
 {
@@ -960,7 +991,7 @@ void controller::compute_coloc_prob_exact()
         eqtl_vec[i].locus_coloc_prob = 0;
 
         vector<double> gprob_vec_m; // marginal gwas pips
-        double gprob_cpip_m = 0;	// marginal gwas cpip
+        double gprob_cpip_m = 0;    // marginal gwas cpip
 
         vector<double> glog10bf_vec; // gwas BF
 
@@ -1030,7 +1061,7 @@ void controller::compute_coloc_prob_exact()
 
         // case 4: gwas-eqtl combination
         vector<vector<double> > coloc_config; // coloc_config[m][n] indicates m-th SNP is the GWAS hit and n-th SNP is the causal eQTL
-                                              // initialization
+                                             // initialization
         for (int k = 0; k < p; k++)
         {
             coloc_config.push_back(vector<double>(p, 0));
@@ -1057,10 +1088,10 @@ void controller::compute_coloc_prob_exact()
         }
 
         // collecting results
-        vector<double> scp_vec;	   // snp-level colocalization probabilities; sum of it is RCP
+        vector<double> scp_vec;    // snp-level colocalization probabilities; sum of it is RCP
         vector<double> gpip_e_vec; // gwas pips informed by eQTL annotation
-        double RCP = 0;			   // region-wise SNP-level colocalization probability
-        double LCP = 0;			   // locus-level colocalization probability
+        double RCP = 0;            // region-wise SNP-level colocalization probability
+        double LCP = 0;            // locus-level colocalization probability
 
         for (int m = 0; m < p; m++)
         {
@@ -1141,7 +1172,7 @@ void controller::compute_coloc_prob_exact()
         GRCP[gene_id] *= (1 - eqtl_vec[i].coloc_prob);
     }
 
-    std::map<string, double>::iterator it = GRCP.begin();
+    map<string, double>::iterator it = GRCP.begin();
     while (it != GRCP.end())
     {
         string gene = it->first;
@@ -1156,3 +1187,61 @@ void controller::compute_coloc_prob_exact()
     fclose(fd3);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////// File processing utility ////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+vector<string> controller::readLines(const string &filename)
+{
+
+    vector<string> lines;
+
+    // Check if file is gzip compressed
+    ifstream file(filename, ios::binary);
+    if (!file)
+    {
+        cerr << "Error: cannot open file: " << filename << endl;
+        exit(1);
+    }
+
+    unsigned char magic[2];
+    file.read(reinterpret_cast<char *>(magic), 2);
+    file.close();
+
+    if (magic[0] == 0x1F && magic[1] == 0x8B)
+    { // gzip magic numbers
+        gzFile gz = gzopen(filename.c_str(), "rb");
+        if (!gz)
+        {
+            cerr << "Error: cannot open gzip file: " << filename << endl;
+            exit(2);
+        }
+
+        char buffer[4096];
+        while (true)
+        {
+            if (gzgets(gz, buffer, sizeof(buffer)) == NULL)
+                break;
+            lines.push_back(string(buffer));
+        }
+        gzclose(gz);
+    }
+    else
+    {
+        ifstream txtFile(filename);
+        if (!txtFile)
+        {
+            cerr << "Error: cannot open text file: " << filename << endl;
+            return lines;
+        }
+
+        string line;
+        while (getline(txtFile, line))
+        {
+            lines.push_back(line);
+        }
+        txtFile.close();
+    }
+
+    return lines;
+}
