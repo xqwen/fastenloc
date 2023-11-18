@@ -1,0 +1,7 @@
+                Intercept    -8.271           -
+Enrichment (no shrinkage)     4.525       0.036
+Enrichment (w/ shrinkage)     4.514       0.036
+
+
+## Alternative (coloc) parameterization: p1 = 2.556e-04, p2 = 6.497e-04, p12 = 1.518e-05
+
