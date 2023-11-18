@@ -18,7 +18,10 @@ private:
 
     map<string, int> snp_index;
     vector<string> snp_vec;
+    
     vector<double> gwas_pip_vec;
+    
+    // vector<double> gwas_abf_vec;
 
     string prefix;
 
@@ -30,9 +33,8 @@ private:
 
     int total_snp;
 
-    double pi1;
-    double pi1_e;
-    double pi1_ne;
+    double pi1_e; // gwas prior for eqtl
+    double pi1_ne; // gwas prior for non-eqtl
 
     double a0_est;
     double a1_est;
@@ -46,10 +48,28 @@ private:
 
     // threshold value to output signal/snp coloc probs
     double output_thresh;
-
     int coloc_prob_option;
 
+
+private:
+
+    vector<double> gwas_abf_prior_vec;
+    vector<double> eqtl_abf_prior_vec;
+    
+
+
+
 public:
+
+
+
+    controller(){
+        // default initialization
+        P_gwas = -1;
+        P_eqtl = -1;
+        ImpN = 25;
+
+    }
     void set_coloc_prob_option(int option)
     {
         coloc_prob_option = option;
@@ -96,8 +116,14 @@ public:
     void set_enrich_params(double a0, double a1);
 
     void load_eqtl(char *eqtl_file, char *tissue);
-    void load_gwas(char *gwas_file, char *tissue = 0);
     void load_eqtl_summary(char *eqtl_file, char *tissue);
+
+
+    void load_gwas(char *gwas_file, char *tissue = 0);
+    void load_gwas_summary(char *gwas_file, char *tissue = 0);
+
+    void load_combined_summary(char *summary_file);
+    void set_abf_piror_vec(vector<double> & eqtl_prior_vec, vector<double> & gwas_prior_vec);
 
     void load_gwas_torus(char *gwas_file);
 
@@ -109,12 +135,16 @@ public:
     void enrich_est();
     void compute_coloc_prob();
 
+
+    void init_pip(); // pre-processing for summary statistics input
+    double torus_estimate(vector<sigCluster> & sig_vec); 
+
 private:
+
     void compute_coloc_prob_exact();
-    void compute_coloc_prob_default();
+    void compute_coloc_prob_legacy();
 
     vector<string> readLines(const string& filename); 
 
-private:
     vector<double> run_EM(vector<int> &eqtl_sample);
 };

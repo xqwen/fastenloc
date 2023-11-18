@@ -1,6 +1,6 @@
 # fastENLOC: fast enrichment estimation aided colocalization analysis
 
-**Version 3** (planned release date: April 2023)
+**Version 3** (planned release date: July 2023)
 
 
 This repository contains the software implementation of fastENLOC, which enables integrative genetic association analysis of molecular QTL data and GWAS data. The statistical model and the key computational procedures are described in \[1\], \[2\], \[3\], and \[4\].
@@ -11,10 +11,12 @@ For questions/comments regarding the software package, please contact Xiaoquan (
 ## New features in version 3
 
 1. Unified VCF input format for both complex- and molecular-trait data
-2. Diagnosis output from multiple imputation procedure 
-3. Capping option for enrichment parameter ($a_1$) 
-4. Tutorial and documentation
-5. Utility for using fine-mapping results from other software tools (e.g., SuSiE)
+2. Improved computational methods for Bayesian fine-mapping results using signal clusters/credible sets
+3. Improved multiple imputation procedure
+4. Diagnosis output from multiple imputation procedure 
+5. Capping option for enrichment parameter ($a_1$) 
+6. Updated tutorial and documentation
+7. Utility to convert fine-mapping results from other software tools (e.g., SuSiE)
 
 ## License
 
@@ -27,9 +29,9 @@ A detailed tutorial is provided in [``tutorial``](https://github.com/xqwen/faste
 
 1. Summarize and prepare input from fine-mapping analysis of eQTL data 
 2. Summarize and prepare input from fine-mapping analysis of GWAS data
-3. Run fastenloc
+3. Run fastENLOC
 
-We distribute pre-computed eQTL annotations from GTEx (v8) data. In the simplest case, the required GWAS PIPs can be computed from single-SNP association summary-statistics (e.g., z-scores and p-values) using [``torus``](https://github.com/xqwen/torus/)
+We distribute pre-computed eQTL annotations from GTEx (v8) data. In the simplest case, the required GWAS PIPs can be computed from single-SNP association summary-statistics (e.g., z-scores and p-values) using [``torus``](https://github.com/xqwen/torus/). For better accuracy and improved statistical power, both molecular and complex-trait phenotypes should be fine-mapped using individual-level data. 
 
 
 ## GTEx v8 multi-tissue eQTL annotations for fastENLOC
