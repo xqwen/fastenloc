@@ -273,6 +273,8 @@ void controller::load_combined_summary(char* summary_input)
 
     fprintf(stderr, "Processing eQTL + GWAS combined summary statistics input ... \n");
 
+    int use_sum_stat = 1;
+
     istringstream ins;
 
     string snp_id; // important
@@ -861,7 +863,10 @@ void controller::compute_coloc_prob_exact()
         for (int k = 0; k < eqtl_vec[i].snp_vec.size(); k++)
         {
             string snp = eqtl_vec[i].snp_vec[k];
-            string locus_id = eqtl_vec[i].id + "(@)" + snp2gwas_locus[snp];
+            string locus_id = eqtl_vec[i].id;
+            if(!use_sum_stat)
+                locus_id += "(@)" + snp2gwas_locus[snp];
+
             if (scp_vec[k] >= output_thresh)
                 fprintf(fd1, "%15s   %15s   %7.3e %7.3e    %7.3e      %7.3e\n", locus_id.c_str(), snp.c_str(), eqtl_vec[i].pip_vec[k], gprob_vec_m[k], gpip_e_vec[k], scp_vec[k]);
             if (scp_vec[k] >= max_scp)
@@ -871,11 +876,13 @@ void controller::compute_coloc_prob_exact()
             }
         }
 
-        string locus_id = eqtl_vec[i].id + "(@)" + snp2gwas_locus[max_snp];
+        string locus_id = eqtl_vec[i].id;
+        
+        if(!use_sum_stat)
+            locus_id += "(@)" + snp2gwas_locus[max_snp];
 
         if (RCP >= output_thresh || LCP >= output_thresh)
         {
-            string locus_id = eqtl_vec[i].id + "(@)" + snp2gwas_locus[max_snp];
             fprintf(fd2, "%15s   %4d  %7.3e %7.3e    %7.3e      %7.3e\t%7.3e\n", locus_id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_cpip_m, gprob_cpip_e, RCP, LCP);
         }
     }

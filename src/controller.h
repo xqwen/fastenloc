@@ -50,6 +50,8 @@ private:
     double output_thresh;
     int coloc_prob_option;
 
+    int use_sum_stat;
+
 
 private:
 
@@ -68,6 +70,8 @@ public:
         P_gwas = -1;
         P_eqtl = -1;
         ImpN = 25;
+
+        use_sum_stat = 0;
 
     }
     void set_coloc_prob_option(int option)
