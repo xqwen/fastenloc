@@ -267,6 +267,7 @@ int main(int argc, char **argv){
         con_sum.set_a1_cap(cap_a1);
         con_sum.set_random_seed(random_seed);
         con_sum.set_prefix(prefix);
+        con_sum.set_coloc_prob_option(coloc_prob_option);
 
 
 

@@ -270,10 +270,11 @@ void controller::load_gwas(char *gwas_file, char *tissue)
 
 void controller::load_combined_summary(char* summary_input)
 {
+    
+    use_sum_stat = 1;
 
     fprintf(stderr, "Processing eQTL + GWAS combined summary statistics input ... \n");
 
-    int use_sum_stat = 1;
 
     istringstream ins;
 
