@@ -1,0 +1,8 @@
+.DS_Store
+*.o
+*.dat
+enloc.*
+test_data/*
+version1/*
+version2/*
+utility/*
