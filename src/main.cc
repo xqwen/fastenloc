@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string>
 #include <string.h>
+#include <math.h>
 
 #define LENGTH 1024
 #define UNDEF -99999999

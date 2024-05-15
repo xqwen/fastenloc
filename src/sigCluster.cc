@@ -1,4 +1,5 @@
 #include "sigCluster.h"
+#include <math.h>
 #include <gsl/gsl_randist.h>
 
 int sigCluster::impute_qtn(const gsl_rng *r){
