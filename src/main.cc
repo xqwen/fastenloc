@@ -10,8 +10,8 @@
 int show_banner(){
 
     fprintf(stderr, "\t\t==================================================================\n\n");
-    fprintf(stderr, "\t\t                     fastENLOC (v3.0)                        \n\n");
-    fprintf(stderr, "\t\t                        July, 2023                              \n\n"); 
+    fprintf(stderr, "\t\t                     fastENLOC (v3.1)                        \n\n");
+    fprintf(stderr, "\t\t                      September, 2024                              \n\n"); 
     fprintf(stderr, "\t\t==================================================================\n\n\n");
     return 1;
 }

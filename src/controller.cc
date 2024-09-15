@@ -295,6 +295,7 @@ void controller::load_combined_summary(char* summary_input)
         if (ins >> sig_id >> snp_id >> bhat_e >> se_e >> bhat_g >> se_g)
         {
 
+            snp_id = sig_id+":"+snp_id;
 
             if (snp_index.find(snp_id) == snp_index.end())
             {
@@ -316,7 +317,7 @@ void controller::load_combined_summary(char* summary_input)
             eqtl_vec[index].snp_vec.push_back(snp_id);
             eqtl_vec[index].compute_BF(bhat_e, se_e);
 
-
+            /*
             if (snp2gwas_locus.find(snp_id) == snp2gwas_locus.end())
             {
                 snp2gwas_locus[snp_id] = sig_id;
@@ -325,6 +326,7 @@ void controller::load_combined_summary(char* summary_input)
             {
                 snp2gwas_locus[snp_id] += "_" + sig_id;
             }
+            */
 
             if (gwas_sig_index.find(sig_id) == gwas_sig_index.end())
             {
@@ -382,7 +384,6 @@ void controller::init_pip(){
     for(int i=0;i<eqtl_vec.size();i++){
         eqtl_vec[i].compute_pip(P_eqtl);
     }
-
 
     for(int i=0;i<gwas_vec.size();i++){
         gwas_vec[i].compute_pip(P_gwas);
@@ -701,6 +702,7 @@ void controller::compute_coloc_prob_exact()
     fprintf(fd2, "Signal\tNum_SNP\tCPIP_qtl\tCPIP_gwas_marginal\tCPIP_gwas_qtl_prior\tRCP\tLCP\n");
     fprintf(fd3, "Gene\t\tGRCP\tGLCP\n");
 
+#pragma omp parallel for num_threads(nthread)
 
     for (int i = 0; i < eqtl_vec.size(); i++)
     {
@@ -764,6 +766,7 @@ void controller::compute_coloc_prob_exact()
         if (locus_epip > 1 - 1e-8)
             locus_epip = 1 - 1e-8;
 
+        
         // computing p(d,r | E, G) by considering all configureations within a single signal cluster (DAP-1 approximation for both traits)
 
         double NC = 0;
@@ -813,6 +816,7 @@ void controller::compute_coloc_prob_exact()
                 coloc_config[m][n] = prob;
             }
         }
+
 
         // collecting results
         vector<double> scp_vec;    // snp-level colocalization probabilities; sum of it is RCP
@@ -867,7 +871,7 @@ void controller::compute_coloc_prob_exact()
             string locus_id = eqtl_vec[i].id;
             if(!use_sum_stat)
                 locus_id += "(@)" + snp2gwas_locus[snp];
-
+#pragma omp critical
             if (scp_vec[k] >= output_thresh)
                 fprintf(fd1, "%15s   %15s   %7.3e %7.3e    %7.3e      %7.3e\n", locus_id.c_str(), snp.c_str(), eqtl_vec[i].pip_vec[k], gprob_vec_m[k], gpip_e_vec[k], scp_vec[k]);
             if (scp_vec[k] >= max_scp)
@@ -884,6 +888,7 @@ void controller::compute_coloc_prob_exact()
 
         if (RCP >= output_thresh || LCP >= output_thresh)
         {
+#pragma omp critical
             fprintf(fd2, "%15s   %4d  %7.3e %7.3e    %7.3e      %7.3e\t%7.3e\n", locus_id.c_str(), int(eqtl_vec[i].snp_vec.size()), eqtl_vec[i].cpip, gprob_cpip_m, gprob_cpip_e, RCP, LCP);
         }
     }
