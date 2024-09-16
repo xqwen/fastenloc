@@ -389,7 +389,52 @@ void controller::init_pip(){
         gwas_vec[i].compute_pip(P_gwas);
     }
 
+    if (dump_sum_conversion)
+    {
+        gzFile gz_eqtl_file = gzopen("eqtl_summary.input.gz", "wb");
+        gzFile gz_gwas_file = gzopen("gwas_summary.input.gz", "wb");
+        if (!gz_eqtl_file || !gz_gwas_file)
+        {
+            std::cerr << "Error: Failed to open gzip file for writing " << std::endl;
+            exit(1);
+        }
 
+        int pos = 1;
+
+        for (int i = 0; i < eqtl_vec.size(); i++)
+        {
+            string locus_id = eqtl_vec[i].id;
+            double cpip = eqtl_vec[i].cpip;
+            for (int k = 0; k < eqtl_vec[i].snp_vec.size(); k++)
+            {
+                string snp = eqtl_vec[i].snp_vec[k];
+                stringstream sstm;
+                sstm<< locus_id << ":1@="<<eqtl_vec[i].pip_vec[k]<< "["<<cpip<<"]";
+                gzprintf(gz_eqtl_file, "chrN\t%d\t%s\tX\tY\t%s\n", pos++, snp.c_str(), sstm.str().c_str());
+            }
+        }
+
+        gzclose(gz_eqtl_file);
+
+        pos = 1;
+
+        for (int i = 0; i < eqtl_vec.size(); i++)
+        {
+            string locus_id = gwas_vec[i].id;
+            double cpip = gwas_vec[i].cpip;
+            for (int k = 0; k < gwas_vec[i].snp_vec.size(); k++)
+            {
+                string snp = gwas_vec[i].snp_vec[k];
+                stringstream sstm;
+                sstm<< locus_id << ":1@="<<gwas_vec[i].pip_vec[k]<< "["<<cpip<<"]";
+                gzprintf(gz_gwas_file, "chrN\t%d\t%s\tX\tY\t%s\n", pos++, snp.c_str(), sstm.str().c_str());
+            }
+        }
+
+        gzclose(gz_gwas_file);
+
+        exit(0);
+    }
 
     gwas_pip_vec = vector<double>(snp_vec.size(), 0.0);
 
@@ -401,20 +446,11 @@ void controller::init_pip(){
             gwas_pip_vec[snp_index[snp]] = gwas_vec[i].pip_vec[j];
         }
     }
-
-
-
 }
-
-
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////// Enrichment Specification and Estimation ////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 // Set enrichment parameters without estimation procedure
 
@@ -445,9 +481,7 @@ void controller::set_enrich_params(double p1, double p2, double p12)
     set_enrich_params(a0, a1);
 }
 
-
 // Estimate enrichment parameters by multiple imputation
-
 
 void controller::enrich_est()
 {
@@ -471,11 +505,9 @@ void controller::enrich_est()
 
     vector<double> eqtl_sample_vec = vector<double>(ImpN, 0.0);
 
-
 #pragma omp parallel for num_threads(nthread)
     for (int k = 0; k < ImpN; k++)
     {
-
 
         vector<int> eqtl_sample = vector<int>(snp_vec.size(), 0);
 
@@ -661,11 +693,6 @@ void controller::enrich_est()
     return;
 }
 
-
-
-
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// Computing and reporting colocalization probabilities ///////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -680,8 +707,6 @@ void controller::compute_coloc_prob()
     else
         compute_coloc_prob_exact();
 }
-
-
 
 ////// exact computation algorithm implemented in version 3
 
@@ -716,8 +741,7 @@ void controller::compute_coloc_prob_exact()
 
         int p = eqtl_vec[i].snp_vec.size(); // number of SNPs
 
-        //printf("%s: %d\n",eqtl_vec[i].id.c_str(), p);
-
+        // printf("%s: %d\n",eqtl_vec[i].id.c_str(), p);
 
         for (int k = 0; k < p; k++)
         {
@@ -726,8 +750,6 @@ void controller::compute_coloc_prob_exact()
             gprob_vec_m.push_back(d);
             gprob_cpip_m += d;
         }
-
-
 
         // renormalizing GWAS marginal PIP if necessary (advoid prob overflow due to LD difference)
         if (gprob_cpip_m > 1 - 1e-5)
@@ -747,9 +769,7 @@ void controller::compute_coloc_prob_exact()
         // Important: the contrast is the scenario that all SNPs in the cluster has zero effects
         // The procedure is based on DAP-1 approximation
 
-        double log10_MNC = log10(1 - P_gwas ) - log10(1 - gprob_cpip_m);
-
-
+        double log10_MNC = log10(1 - P_gwas) - log10(1 - gprob_cpip_m);
 
         for (int k = 0; k < p; k++)
         {
@@ -757,8 +777,7 @@ void controller::compute_coloc_prob_exact()
 
             if (gpost == 0)
                 gpost = 1e-10;
-            
-            
+
             double log10bf = log10(gpost) - log10(P_gwas) + log10_MNC;
             glog10bf_vec.push_back(log10bf);
             locus_epip += eqtl_vec[i].pip_vec[k];
@@ -766,7 +785,6 @@ void controller::compute_coloc_prob_exact()
         if (locus_epip > 1 - 1e-8)
             locus_epip = 1 - 1e-8;
 
-        
         // computing p(d,r | E, G) by considering all configureations within a single signal cluster (DAP-1 approximation for both traits)
 
         double NC = 0;
@@ -817,7 +835,6 @@ void controller::compute_coloc_prob_exact()
             }
         }
 
-
         // collecting results
         vector<double> scp_vec;    // snp-level colocalization probabilities; sum of it is RCP
         vector<double> gpip_e_vec; // gwas pips informed by eQTL annotation
@@ -838,7 +855,6 @@ void controller::compute_coloc_prob_exact()
                 }
             }
         }
-
 
         eqtl_vec[i].coloc_prob = RCP;
         eqtl_vec[i].locus_coloc_prob = LCP;
@@ -869,7 +885,7 @@ void controller::compute_coloc_prob_exact()
         {
             string snp = eqtl_vec[i].snp_vec[k];
             string locus_id = eqtl_vec[i].id;
-            if(!use_sum_stat)
+            if (!use_sum_stat)
                 locus_id += "(@)" + snp2gwas_locus[snp];
 #pragma omp critical
             if (scp_vec[k] >= output_thresh)
@@ -882,8 +898,8 @@ void controller::compute_coloc_prob_exact()
         }
 
         string locus_id = eqtl_vec[i].id;
-        
-        if(!use_sum_stat)
+
+        if (!use_sum_stat)
             locus_id += "(@)" + snp2gwas_locus[max_snp];
 
         if (RCP >= output_thresh || LCP >= output_thresh)
@@ -927,17 +943,9 @@ void controller::compute_coloc_prob_exact()
     fclose(fd3);
 }
 
-
-
-
-
-
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////// Utility functions //////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 // File parsing utility
 
@@ -996,10 +1004,6 @@ vector<string> controller::readLines(const string &filename)
     return lines;
 }
 
-
-
-
-
 ///////////// Find MLE of the enrichment parameters given an MI eQTL sample ////////////////////
 
 vector<double> controller::run_EM(vector<int> &eqtl_sample)
@@ -1012,8 +1016,8 @@ vector<double> controller::run_EM(vector<int> &eqtl_sample)
     double var0;
     double var1;
 
-    double r1 = exp(a0 + a1);    // prior odds for eQTL
-    double r0 = exp(a0);         // prior odds for non-eQTL
+    double r1 = exp(a0 + a1);          // prior odds for eQTL
+    double r0 = exp(a0);               // prior odds for non-eQTL
     double rm = P_gwas / (1 - P_gwas); // marginal prior odds
 
     while (1)
@@ -1058,7 +1062,7 @@ vector<double> controller::run_EM(vector<int> &eqtl_sample)
 
         double a1_new = log(e1g1 * e0g0 / (e1g0 * e0g1));
 
-        //printf("EM:  (%f\t%f\t%f\t%f)\t\t%f\t%f\n", e0g0, e1g1, e1g0, e0g1,a1_new, a0);
+        // printf("EM:  (%f\t%f\t%f\t%f)\t\t%f\t%f\n", e0g0, e1g1, e1g0, e0g1,a1_new, a0);
         if (fabs(a1_new - a1) < 0.01)
         {
             a1 = a1_new;
@@ -1082,37 +1086,33 @@ vector<double> controller::run_EM(vector<int> &eqtl_sample)
     return (av);
 }
 
-
-
-
-
 ////  Setting various controller options
 
-
-
-void controller::set_abf_piror_vec(vector<double> & eqtl_prior_vec, vector<double> & gwas_prior_vec){
+void controller::set_abf_piror_vec(vector<double> &eqtl_prior_vec, vector<double> &gwas_prior_vec)
+{
 
     vector<double> default_prior_vec;
-    
+
     default_prior_vec.push_back(0.1);
     default_prior_vec.push_back(0.2);
     default_prior_vec.push_back(0.4);
     default_prior_vec.push_back(0.8);
     default_prior_vec.push_back(1.6);
 
-    if(eqtl_prior_vec.size()>0){
+    if (eqtl_prior_vec.size() > 0)
+    {
         eqtl_abf_prior_vec = eqtl_prior_vec;
-    }else
+    }
+    else
         eqtl_abf_prior_vec = default_prior_vec;
 
-    if(gwas_prior_vec.size()>0){
+    if (gwas_prior_vec.size() > 0)
+    {
         gwas_abf_prior_vec = gwas_prior_vec;
-    }else   
+    }
+    else
         gwas_abf_prior_vec = default_prior_vec;
-
 }
-
-
 
 void controller::set_prefix(char *str)
 {
@@ -1127,21 +1127,13 @@ void controller::set_prefix(char *str)
     }
 }
 
-
-
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////// Legacy Code (Non-default anymore but still working with explicit argument /////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
 //////// 1. input function
 
-
-// load GWAS data in TORUS format 
-
+// load GWAS data in TORUS format
 
 void controller::load_gwas_torus(char *gwas_file)
 {
@@ -1230,18 +1222,12 @@ void controller::load_gwas_torus(char *gwas_file)
     if (total_snp < snp_vec.size())
         total_snp = snp_vec.size();
 
-
     fprintf(stderr, "read in %d SNPs (eQTL+gwas), %d GWAS loci, %.1f expected hits\n\n", int(snp_vec.size()), int(gwas_vec.size()), gwas_sum);
 
     // estimated marginal priors
     P_gwas = gwas_sum / total_snp;
     P_eqtl = P_eqtl / total_snp;
 }
-
-
-
-
-
 
 /////// 2. compute colocalization probabilities
 
@@ -1263,7 +1249,6 @@ void controller::compute_coloc_prob_legacy()
     fprintf(fd1, "Signal\tSNP\tPIP_qtl\tPIP_gwas_marginal\tPIP_gwas_qtl_prior\tSCP\n");
     fprintf(fd2, "Signal\tNum_SNP\tCPIP_qtl\tCPIP_gwas_marginal\tCPIP_gwas_qtl_prior\tRCP\tLCP\n");
     fprintf(fd3, "Gene\t\tGRCP\tGLCP\n");
-
 
     double r1 = pi1_e / (1 - pi1_e);
     double r0 = pi1_ne / (1 - pi1_ne);
@@ -1400,19 +1385,9 @@ void controller::compute_coloc_prob_legacy()
     fclose(fd3);
 }
 
-
-
-
-
-
-
-
-
 //////////////////////////////////////////////////////////////////////////////
 ///////////// Code under active development  /////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-
-
 
 void controller::load_eqtl_summary(char *eqtl_file, char *tissue)
 {
@@ -1529,41 +1504,28 @@ void controller::load_gwas_summary(char *gwas_file, char *tissue)
 {
 }
 
-
-
 // EM algorithm to estimate marginal prior, for summary statistics input only
 
-double controller::torus_estimate(vector<sigCluster> & sig_vec){
+double controller::torus_estimate(vector<sigCluster> &sig_vec)
+{
 
     // initalize pi value
-    double pi = 1.0/total_snp;
-    while(1){
+    double pi = 1.0 / total_snp;
+    while (1)
+    {
 
         // E step
         double sum = 0;
-        for(int i=0;i<sig_vec.size();i++){
+        for (int i = 0; i < sig_vec.size(); i++)
+        {
             sum += sig_vec[i].get_cpip(pi);
         }
-        
 
         // M step
-        double new_pi = sum/total_snp;
-        if(fabs(new_pi - pi)/pi < 1e-2)
+        double new_pi = sum / total_snp;
+        if (fabs(new_pi - pi) / pi < 1e-2)
             return new_pi;
-        
+
         pi = new_pi;
     }
-        
-
-
-
-
-
 }
-    
-    
-
-
-
-
-

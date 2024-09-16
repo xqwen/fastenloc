@@ -51,6 +51,7 @@ private:
     int coloc_prob_option;
 
     int use_sum_stat;
+    int dump_sum_conversion;
 
 
 private:
@@ -111,6 +112,10 @@ public:
 
     void set_random_seed(unsigned long rseed){
         seed = rseed;
+    }
+
+    void set_sum_conversion(int conv){
+        dump_sum_conversion = conv;
     }
 
 

@@ -59,6 +59,8 @@ int main(int argc, char **argv){
     double binary_eqtl = 0;
     double binary_gwas = 0; 
 
+    int sum_conversion = 0; 
+
     double cap_a1 = -UNDEF;
 
     double output_thresh = 1e-4;
@@ -103,7 +105,10 @@ int main(int argc, char **argv){
         }
 
 
-
+        if(strcmp(argv[i], "--conv") ==0){
+            sum_conversion = 1;
+            continue;
+        }
 
         if(strcmp(argv[i], "-t")==0 || strcmp(argv[i], "-tissue")==0){
             strcpy(tissue,argv[++i]);
@@ -295,7 +300,7 @@ int main(int argc, char **argv){
             con_sum.set_enrich_params(p1, p2, p12);
         }
 
-
+        con_sum.set_sum_conversion(sum_conversion);
         con_sum.init_pip();
         
         if(a1 == UNDEF && p12 == UNDEF){
