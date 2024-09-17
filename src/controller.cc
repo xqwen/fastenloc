@@ -6,7 +6,7 @@
 #include <string.h>
 #include <gsl/gsl_rng.h>
 #include <math.h>
-#include <omp.h>
+#include <omp.h> 
 #include <zlib.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -463,12 +463,19 @@ void controller::set_enrich_params(double a0, double a1)
     }
     pi1_e = exp(a0 + a1) / (1 + exp(a0 + a1));
     pi1_ne = exp(a0) / (1 + exp(a0));
+    p1 = (1 - P_eqtl) * exp(a0) / (1 + exp(a0));
+    p2 = P_eqtl / (1 + exp(a0 + a1));
+    p12 = P_eqtl * exp(a0 + a1) / (1 + exp(a0 + a1));
+
 }
 
 // Set enrichment parameters without estimation procedure: p_1 = p(gwas only), p_2 = p(eqtl only), p12 = p( colocalization )
 
-void controller::set_enrich_params(double p1, double p2, double p12)
+void controller::set_enrich_params(double p1_, double p2_, double p12_)
 {
+    p1 = p1_;
+    p2 = p2_;
+    p12 = p12_;
 
     double a0 = log(p1 / (1 - p1 - p2 - p12));
     double a1 = log(p12 * (1 - p1 - p2 - p12) / (p1 * p2));
@@ -672,9 +679,9 @@ void controller::enrich_est()
     // use shrinkage estimate
     a1_est = a1_shrink_est;
 
-    double p1 = (1 - P_eqtl) * exp(a0_est) / (1 + exp(a0_est));
-    double p2 = P_eqtl / (1 + exp(a0_est + a1_est));
-    double p12 = P_eqtl * exp(a0_est + a1_est) / (1 + exp(a0_est + a1_est));
+    p1 = (1 - P_eqtl) * exp(a0_est) / (1 + exp(a0_est));
+    p2 = P_eqtl / (1 + exp(a0_est + a1_est));
+    p12 = P_eqtl * exp(a0_est + a1_est) / (1 + exp(a0_est + a1_est));
 
     fprintf(fd, "\n\n## Alternative (coloc) parameterization: p1 = %7.3e, p2 = %7.3e, p12 = %7.3e\n\n", p1, p2, p12);
 
@@ -687,7 +694,7 @@ void controller::enrich_est()
     // printf("%7.3e  %7.3e     %7.3e\n", pi1_e, pi1_ne, pi1);
 
     fprintf(stderr, "\nEnrichment analysis is completed\n");
-    fprintf(stderr, "pi1 = %7.3e  pi1_e = %7.3e pi1_ne = %7.3e\np_eqtl = %7.3e\n", P_gwas, pi1_e, pi1_ne, P_eqtl);
+    // fprintf(stderr, "pi1 = %7.3e  pi1_e = %7.3e pi1_ne = %7.3e\t\tp_eqtl = %7.3e\n", P_gwas, pi1_e, pi1_ne, P_eqtl);
 
     gsl_rng_free(r);
     return;
@@ -701,7 +708,6 @@ void controller::enrich_est()
 
 void controller::compute_coloc_prob()
 {
-
     if (coloc_prob_option == 1)
         compute_coloc_prob_legacy();
     else
@@ -726,6 +732,7 @@ void controller::compute_coloc_prob_exact()
     fprintf(fd1, "Signal\tSNP\tPIP_qtl\tPIP_gwas_marginal\tPIP_gwas_qtl_prior\tSCP\n");
     fprintf(fd2, "Signal\tNum_SNP\tCPIP_qtl\tCPIP_gwas_marginal\tCPIP_gwas_qtl_prior\tRCP\tLCP\n");
     fprintf(fd3, "Gene\t\tGRCP\tGLCP\n");
+
 
 #pragma omp parallel for num_threads(nthread)
 
@@ -846,13 +853,17 @@ void controller::compute_coloc_prob_exact()
             for (int n = 0; n < p; n++)
             {
                 double prob = coloc_config[m][n] / NC;
-                LCP += prob;
 
                 if (m == n)
-                {
+                {   
+                    // correction for small colocalization prob when not all SNPs available
+                    if(prob<p12&&!use_sum_stat)
+                        prob = p12;
+
                     RCP += prob;
                     scp_vec.push_back(prob);
                 }
+                LCP += prob;
             }
         }
 

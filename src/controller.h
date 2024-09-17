@@ -46,6 +46,11 @@ private:
     double P_eqtl;
     double P_gwas;
 
+    // alternative parameterization
+    double p1;
+    double p2;
+    double p12;
+
     // threshold value to output signal/snp coloc probs
     double output_thresh;
     int coloc_prob_option;
