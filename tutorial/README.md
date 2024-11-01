@@ -1,5 +1,51 @@
-# fastENLOC User's Guide (v3)
-*Updated July, 2023*
+# fastENLOC User's Guide 
+
+*Version 3.1*
+
+
+
+## Table of Contents
+
+1. [Input Data Format](./Input.md)
+2. [Enrichment Analysis and Prior Setup](./enrichment.md)
+3. [Running with Fine-mapped Results](./ss_run.md)
+4. [Running with Summary Statistics](./fm_run.md)
+5. [Interpret Output](./output.md)
+6. [Miscellaneous Running Options](options.md)
+
+
+
+
+
+
+
+
+
+## Type of input data
+
+fastENLOC takes summary information from genetic association analysis of a pair of traits, referred as molecular QTL (or eQTL) and GWAS trait, respectively. The current version of fastENLOC supports two types of summary information:
+1. Summary probabilistic association information from multi-SNP fine-mapping analyses (supported fine-mapping software includes SuSiE and DAP-G).
+2. Summary statistics from single-SNP association analyses, specifically the estimated effect size, beta, and its standard error, se(beta), for each SNP.  
+
+The first type of input is much preferred as it typically yields more accurate results. Nevertheless, for certain tasks, e.g., estimating global enrichment of eQTLs in GWAS hits, both input types generally produce comparable results in practice.
+
+
+
+## Single-SNP summary statistics input
+
+The single-SNP summary statistics input requires a text file, which can be either compressed or uncompressed. The file should follow the format of a data matrix:
+```
+Locus_id   SNP_id   beta_eqtl   se_eqtl    beta_gwas   se_gwas
+```
+The ``Locus_id`` can be used to represent a gene in an eQTL study. While the signs of ``beta_eqtl`` and ``beta_gwas`` are not critical for the colocalization analysis, it is strongly recommended that both are defined using the same reference allele.
+
+An example input file can be downloaded from [here]().
+
+
+## Fine-mapping probabilistic association information input
+
+
+
 
 To run fastENLOC, one needs to prepare probabilistic eQTL annotations generated from software package [``DAP-G``](https://github.com/xqwen/dap/) and posterior probabilities from analyzing GWAS data. This document illustrates the details on each step.
 
@@ -98,11 +144,11 @@ Required:
 
 Recommended:
 
-+ ``-total_variants``: specify the number of total SNPs interrogated in GWAS data. This option is highly important if GWAS input does not contain all SNPs interrogated (e.g., in some cases, only fine-mapped geomic regions are included). fastENLOC also assumes that all annotated eQTL SNPs from the eqTL annotation file are part of the GWAS analysis.   
++ ``-total_variants``: specify the number of total SNPs interrogated in GWAS data. This option is highly important if GWAS input does not contain all SNPs interrogated (e.g., in some cases, only fine-mapped gnomic regions are included). fastENLOC also assumes that all annotated eQTL SNPs from the eQTL annotation file are part of the GWAS analysis.   
 
 Optional:
 
-+ ``-s``: shrinkage parameter, similar to the shrinkage parameter used in ridge regression. It takes any non-negative value and shrinks the enrichment esitmate towards 0. When it is set to 0, no shrinkage will be applied. A large value indicates strong shrinkage. The default value is set to 1.0.
++ ``-s``: shrinkage parameter, similar to the shrinkage parameter used in ridge regression. It takes any non-negative value and shrinks the enrichment estimate towards 0. When it is set to 0, no shrinkage will be applied. A large value indicates strong shrinkage. The default value is set to 1.0.
 + ``-thread``: number of parallel threads for analysis. By default, a single thread is used
 + ``-prefix``: specify the prefix for the output files.
 
