@@ -33,11 +33,11 @@ For best results, we recommend performing multi-SNP probabilistic fine-mapping b
 The fine-mapping results should be organized to two VCF files, one for each trait. (We provide utilities to convert DAP-G and SuSiE fine-mapping results to compatible fastENLOC VCF format.) 
 To run fastENLOC analysis, simply issue command
 ```
-fastENLOC -g gwas.vcf.gz -e eqtl.vcf.gz 
+fastenloc -g gwas.vcf.gz -e eqtl.vcf.gz 
 ```
 For GWAS file using the legacy fastENLOC GWAS format (version 1 & 2), use 
 ```
-fastENLOC -go gwas.old_format.vcf.gz -e eqtl.vcf.gz
+fastenloc -go gwas.old_format.vcf.gz -e eqtl.vcf.gz
 ```
 
 
@@ -46,7 +46,7 @@ fastENLOC -go gwas.old_format.vcf.gz -e eqtl.vcf.gz
 fastENLOC can also run with minimum summary statistics information, namely, the estimated SNP genetic effects and the corresponding standard errors from single-SNP analyses of molecular and complex traits. 
 In this case, the input is organized into a single tabular file. The command to start fastENLOC analysis is 
 ```
-fastENLOC -sum summary_stats_file
+fastenloc -sum summary_stats_file
 ```
 
 
