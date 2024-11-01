@@ -1,6 +1,6 @@
 # fastENLOC: fast enrichment estimation aided colocalization analysis
 
-**Version 3** (planned release date: July 2023)
+**Version 3.1** 
 
 
 This repository contains the software implementation of fastENLOC, which enables integrative genetic association analysis of molecular QTL data and GWAS data. The statistical model and the key computational procedures are described in \[1\], \[2\], \[3\], and \[4\].
@@ -8,35 +8,51 @@ This repository contains the software implementation of fastENLOC, which enables
 For questions/comments regarding the software package, please contact Xiaoquan (William) Wen (xwen at umich dot edu).
 
 
-## New features in version 3
+## New features in version 3.1
 
-1. Unified VCF input format for both complex- and molecular-trait data
-2. Improved computational methods for Bayesian fine-mapping results using signal clusters/credible sets
-3. Improved multiple imputation procedure
-4. Diagnosis output from multiple imputation procedure 
-5. Capping option for enrichment parameter ($a_1$) 
-6. Updated tutorial and documentation
-7. Utility to convert fine-mapping results from other software tools (e.g., SuSiE)
+- Unified VCF input format for both complex- and molecular-trait data
+- Approximate computation with only summary-level data
+- Improved computational methods for Bayesian fine-mapping results using signal clusters/credible sets
+- Improved multiple imputation procedure with diagnostic output 
+- Updated tutorial and documentation
+- Utility to convert fine-mapping results from other software tools (e.g., SuSiE)
 
 ## License
 
 Software distributed under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](http://www.gnu.org/licenses/gpl-3.0.en.html) for more details.
 
 
-## Tutorial and guideline
+## Quick start
 
-A detailed tutorial is provided in [``tutorial``](https://github.com/xqwen/fastenloc/tree/master/tutorial/) directory. Briefly, three main steps are required for a complete analysis
+A detailed tutorial is provided in [``tutorial``](https://github.com/xqwen/fastenloc/tree/master/tutorial/) directory.
 
-1. Summarize and prepare input from fine-mapping analysis of eQTL data 
-2. Summarize and prepare input from fine-mapping analysis of GWAS data
-3. Run fastENLOC
 
-We distribute pre-computed eQTL annotations from GTEx (v8) data. In the simplest case, the required GWAS PIPs can be computed from single-SNP association summary-statistics (e.g., z-scores and p-values) using [``torus``](https://github.com/xqwen/torus/). For better accuracy and improved statistical power, both molecular and complex-trait phenotypes should be fine-mapped using individual-level data. 
+### Running with fine-mapping results
+
+For best results, we recommend performing multi-SNP probabilistic fine-mapping before the fastENLOC analysis.
+The fine-mapping results should be organized to two VCF files, one for each trait. (We provide utilities to convert DAP-G and SuSiE fine-mapping results to compatible fastENLOC VCF format.) 
+To run fastENLOC analysis, simply issue command
+```
+fastENLOC -g gwas.vcf.gz -e eqtl.vcf.gz 
+```
+For GWAS file using the legacy fastENLOC GWAS format (version 1 & 2), use 
+```
+fastENLOC -go gwas.old_format.vcf.gz -e eqtl.vcf.gz
+```
+
+
+### Running with summary-statistic input
+
+fastENLOC can also run with minimum summary statistics information, namely, the estimated SNP genetic effects and the corresponding standard errors from single-SNP analyses of molecular and complex traits. 
+In this case, the input is organized into a single tabular file. The command to start fastENLOC analysis is 
+```
+fastENLOC -sum summary_stats_file
+```
 
 
 ## GTEx v8 multi-tissue eQTL annotations for fastENLOC
 
-If you prefer to using newly released GTEx v8 eQTL annotation for analysis, please download the following vcf files
+We provide pre-formatted GTEx v8 eQTL annotation in fastENLOC VCF format:
 
 +  [Multi-tissue eQTL annotation with hg38 position ID](https://drive.google.com/open?id=1kfH_CffxyCtZcx3z7k63rIARNidLv1_P)
 +  [Multi-tissue eQTL annotation with rs ID](https://drive.google.com/open?id=1rSaHenk8xOFtQo7VuDZevRkjUz6iwuj0)
