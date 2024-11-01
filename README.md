@@ -29,13 +29,13 @@ A detailed tutorial is provided in [``tutorial``](https://github.com/xqwen/faste
 
 ### Running with fine-mapping results
 
-For best results, we recommend performing multi-SNP probabilistic fine-mapping before the fastENLOC analysis.
-The fine-mapping results should be organized to two VCF files, one for each trait. (We provide utilities to convert DAP-G and SuSiE fine-mapping results to compatible fastENLOC VCF format.) 
-To run fastENLOC analysis, simply issue command
+For optimal results, we recommend performing multi-SNP probabilistic fine-mapping prior to running the fastENLOC analysis. The fine-mapping outputs should be organized into two VCF files, one for each trait. (Utilities are available to convert DAP-G and SuSiE fine-mapping results to the fastENLOC-compatible VCF format.)
+
+To run the fastENLOC analysis, use the following command:
 ```
-fastenloc -g gwas.vcf.gz -e eqtl.vcf.gz 
+fastenloc -g gwas.vcf.gz -e eqtl.vcf.gz
 ```
-For GWAS file using the legacy fastENLOC GWAS format (version 1 & 2), use 
+If you are using the legacy fastENLOC GWAS format (version 1 or 2) for the GWAS file, use this command instead:
 ```
 fastenloc -go gwas.old_format.vcf.gz -e eqtl.vcf.gz
 ```
@@ -43,16 +43,16 @@ fastenloc -go gwas.old_format.vcf.gz -e eqtl.vcf.gz
 
 ### Running with summary-statistic input
 
-fastENLOC can also run with minimum summary statistics information, namely, the estimated SNP genetic effects and the corresponding standard errors from single-SNP analyses of molecular and complex traits. 
-In this case, the input is organized into a single tabular file. The command to start fastENLOC analysis is 
+fastENLOC can also operate with minimal summary statistics, specifically the estimated SNP genetic effects and corresponding standard errors from single-SNP analyses of molecular and complex traits.
+
+For this approach, the input should be organized into a single tabular file. To initiate the fastENLOC analysis, use the following command:
 ```
 fastenloc -sum summary_stats_file
 ```
 
 
 ## GTEx v8 multi-tissue eQTL annotations for fastENLOC
-
-We provide pre-formatted GTEx v8 eQTL annotation in fastENLOC VCF format:
+We provide pre-formatted GTEx v8 eQTL annotations (fine-mapped using DAP-G) in the fastENLOC-compatible VCF format.
 
 +  [Multi-tissue eQTL annotation with hg38 position ID](https://drive.google.com/open?id=1kfH_CffxyCtZcx3z7k63rIARNidLv1_P)
 +  [Multi-tissue eQTL annotation with rs ID](https://drive.google.com/open?id=1rSaHenk8xOFtQo7VuDZevRkjUz6iwuj0)
