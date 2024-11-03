@@ -6,7 +6,7 @@
 
 ## Table of Contents
 
-1. [Input Data Format](./Input.md)
+1. [Input Data Format](./input.md)
 2. [Enrichment Analysis and Prior Setup](./enrichment.md)
 3. [Running with Fine-mapped Results](./ss_run.md)
 4. [Running with Summary Statistics](./fm_run.md)
