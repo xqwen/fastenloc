@@ -1,0 +1,113 @@
+#!/usr/bin/perl
+use Cwd 'abs_path';
+
+$tissue = "";
+$dir = './';
+$thresh = 0;
+$concat = 0;
+
+
+for($i=0;$i<= $#ARGV; $i++){
+    if($ARGV[$i] eq "-d" || $ARGV[$i] eq "-dir"){
+        $dir = $ARGV[++$i];
+        next;
+    }
+    if($ARGV[$i] eq "-v" || $ARGV[$i] eq "-vcf"){
+        $vcf = $ARGV[++$i];
+        next;
+    }
+    if($ARGV[$i] eq "-t" || $ARGV[$i] eq "-tissue"){
+        $tissue = $ARGV[++$i];
+        next;
+    }
+
+    if($ARGV[$i] eq "-p"){
+        $thresh = $ARGV[++$i];
+        next;
+    }
+
+    if($ARGV[$i] eq "--concat"){
+        $concat = 1;
+        next;
+    }
+
+}
+
+if(! -e $vcf){
+    print STDERR "Error: VCF header is not specified ... \n";
+    exit(1);
+}
+
+
+$dir = abs_path($dir);;
+@files = <$dir/*>;
+$count=0;
+foreach $f (@files){
+    process_fm($f);
+}
+
+open FILE, "zcat $vcf |";
+while(<FILE>){
+    next if /^\s*\#/;
+    my @data = split /\s+/, $_;
+    shift @data until $data[0]=~/^\S/;
+    if(defined($snp{$data[2]})){
+        print "$data[0]\t$data[1]\t$data[2]\t$data[3]\t$data[4]\t$snp{$data[2]}->{info}\n";
+    }
+}
+
+
+sub process_fm{
+    my ($f) = @_;
+    
+    ##########################################################
+    #  Edit this line to extract gene id from file name      #
+    ##########################################################
+
+    $f =~ m{.*/([^/]+)\.[^.]+$}
+
+    #########################################################
+
+
+    my $gene = $1;
+
+    my %cluster;
+    my %snp_info;
+
+    open FILE, "$f";
+    while(<FILE>){
+
+        next if $_ !~ /\d/;
+        my @data = split /\s+/, $_;
+        shift @data until $data[0]=~/^\S/;
+
+
+
+        $cluster{$data[0]}->{pip} += $data[2];
+        $cluster{$data[0]}->{count} += 1;
+
+        $id = "$data[1]";
+        if($concat == 1){
+            $id = "$gene\_$data[1]";
+        }
+        $snp_info{$id}->{info} = "$gene:$data[0]\@$tissue\=$data[2]".$cluster{$data[4]};
+        $snp_info{$id}->{cluster} = $data[0];
+    }
+
+    foreach $id (keys %snp_info){
+        my $info = $snp_info{$id}->{info};
+        my $c = $snp_info{$id}->{cluster};
+        $info .= "\[$cluster{$c}->{pip}\:$cluster{$c}->{count}\]";
+
+        if(!defined($snp{$id})){
+            $snp{$id}->{info} = $info;
+        }else{
+            $snp{$id}->{info} .="|".$info;
+        }
+
+
+    }
+
+}
+
+
