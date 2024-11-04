@@ -61,7 +61,6 @@ There is no restriction on the number of annotation entries that can be concaten
 To run fastENLOC, one needs to prepare probabilistic eQTL annotations generated from software package [``DAP-G``](https://github.com/xqwen/dap/) and posterior probabilities from analyzing GWAS data. This document illustrates the details on each step.
 
 
-
 ### Use pre-computed GTEx multi-tissue eQTL annotation
 
 Simply download appropriate vcf files below. Need to specify ``-tissue`` command line option in fastENLOC analysis. 
@@ -69,20 +68,23 @@ Simply download appropriate vcf files below. Need to specify ``-tissue`` command
 +  [Multi-tissue eQTL annotation with hg38 position ID](https://drive.google.com/open?id=1kfH_CffxyCtZcx3z7k63rIARNidLv1_P)
 +  [Multi-tissue eQTL annotation with rs ID](https://drive.google.com/open?id=1rSaHenk8xOFtQo7VuDZevRkjUz6iwuj0)
 
-When making complex trait file, make sure variant IDs match the corresponding QTL file. 
+When making complex trait file, make sure variant IDs match the corresponding QTL file.
 
 
 
-### Derive annotations based on your own eQTL data
+### Construct fine-mapping input from DAP-G and SuSiE results
 
-The required annotations can be obtained from Bayeisan multi-SNP fine-mapping analysis using software package [``DAP``](https://github.com/xqwen/dap/). This [document](https://github.com/xqwen/dap/tree/master/gtex_v8_analysis) provides a summary on the processing of GTEx v8 data. 
+The probabilistic fine-mapping input files can be constructed using the utility provided in the ``fastENLOC`` repo. 
+Currently, ``fastENLOC`` supports ``DAP`` and ``SuSiE`` as both provide signal cluster/credible set information required by the fastENLOC colocalization analysis.  
+Both ``DAP`` and ``SuSiE`` analyze a pre-defined genomic region, i.e., a locus, at a time. 
 
-Once the fine-mapping by DAP is completed
+Upon completing fine-mapping analysis, following the procedures described below to construct the probabilistic fine-mapping input for fastENLOC,
 
-1. make sure each result file from a gene is named by the corresponding gene name, e.g., ``GENE\_NAME.postfix`` (postfix can be arbitrary but it is required)
-2. Put all fine-mapping results into a single empty directory (``dap_rst_dir``)
-3. provide a vcf file to annotate all SNP's positions (``snp_vcf_file``).
-4. Run script ``summarize_dap2enloc.pl`` to generate annotation vcf file
+1. Name each fine-mapping output file by ``locus_id.postfix``, where ``locus_id`` is the required entry in the fastENLOC input file.  The postfix can be arbitrary but it is required. The utility takes the leading string before the delimiter ``.`` as the locus id.
+2. Organize the fine-mapping output files of all loci into a single directory ``fm_rst_dir``. The utility tool assume all files within the directories are fine-mapping output files. Thus avoid place unrelated files into ``fm_rst_dir``.
+3. Provide a VCF file to all annotate all variant's position and allel information. No INFO field is expected or used by the utility tool. 
+
+
 
 ```
    summarize_dap2enloc.pl -dir dap_rst_dir -vcf snp_vcf_file [-tissue tissue_name] | gzip - > fastenloc.eqtl.annotation.vcf.gz
