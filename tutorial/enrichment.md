@@ -23,12 +23,18 @@ $$ p_1 = P(d=1, \gamma=0) = p_g - p_{12} $$
 and 
 $$ p_2 = P(d=0, \gamma=1) = p_e - p_{12} $$
 
-Conversely, 
+Conversely,
+
 $$ p_g = p_{12} + p_1 $$
+
 $$ p_e = p_{12} + p_2 $$
+
 $$ \alpha_0 = \log\left[\frac{p_1}{1-p_1-p_2-p_{12}}\right] $$
+
 and 
+
 $$ \alpha_1 = \log \left[ \frac{(1-p_{12}-p_1 - p_2)\,p_{12}}{p_1 \, p_2} \right],$$
+
 indicating that the two different parameterizations are equivalent. 
 
 
