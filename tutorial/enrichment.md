@@ -48,10 +48,10 @@ indicating that the two different parameterizations are equivalent.
 TThe enrichment analysis procedure is integrated into fastENLOC and runs by default. The following command-line options are key for this procedure:
 
 
-+ ``-total_variants total_variants_number``: specifies the total number of genetic variants measured in the GWAS study. The input data, particularly the probabilistic fine-mapping input, typically includes only a small subset of notable variants. However, the genome-wide total variant count is crucial for calibrating $p_g$ and $p_e$. If this option is not specified, fastENLOC will pause execution and prompt the user to confirm the number.
-+  ``-impute imputation_runs``: defines the number of multiple imputation runs, set to 25 by default, which is generally sufficient based on multiple imputation literature.
++ ``-total_variants total_variants_number``: specify the total number of genetic variants measured in the GWAS study. The input data, particularly the probabilistic fine-mapping input, typically includes only a small subset of notable variants. However, the genome-wide total variant count is crucial for calibrating $p_g$ and $p_e$. If this option is not specified, fastENLOC will pause execution and prompt the user to confirm the number.
++  ``-impute imputation_runs``: define the number of multiple imputation runs, set to 25 by default, which is generally sufficient based on multiple imputation literature.
 
-+ ``-shrinkage coef``: sets the shrinkage coefficient for the $\alpha_1$ estimate. When informative colocalized variants are sparse, the $\alpha_1$ estimate can become unstable, often indicated by a large standard error. In such cases, fastENLOC shrinks $\hat \alpha_1$ toward 0 according to the specified shrinkage coefficient. This coefficient is defined as the inverse of the prior variance on $\alpha_1$ — a larger value increases the shrinkage effect. By default, the shrinkage coefficient is set to 1, which generally performs well across application scenarios.
++ ``-shrinkage coef``: set the shrinkage coefficient for the $\alpha_1$ estimate. When informative colocalized variants are sparse, the $\alpha_1$ estimate can become unstable, often indicated by a large standard error. In such cases, fastENLOC shrinks $\hat \alpha_1$ toward 0 according to the specified shrinkage coefficient. This coefficient is defined as the inverse of the prior variance on $\alpha_1$ — a larger value increases the shrinkage effect. By default, the shrinkage coefficient is set to 1, which generally performs well across application scenarios.
 
 
 ## Bypassing Enrichment Analysis
