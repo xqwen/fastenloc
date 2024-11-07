@@ -18,7 +18,7 @@ Treating $d$ and $\gamma$ as missing data, fastENLOC applies a multiple imputati
 The ``coloc`` method parameterizes the prior for colocalized variant by $p_{12}$. 
 It follows that 
 
-$$ p_{12} = P(d=1, \gamma=1) = \frac{\exp(\alpha_0 + \alpha_1)}{1+\exp(\alpha_0 + \alpha_1)} \, p_e $$ 
+$$ p_{12} = P(d=1, \gamma=1) = \frac{\exp(\alpha_0 + \alpha_1)}{1+\exp(\alpha_0 + \alpha_1)}  p_e $$ 
 
 Additionally, it requires
 
@@ -38,7 +38,7 @@ $$ \alpha_0 = \log\left[\frac{p_1}{1-p_1-p_2-p_{12}}\right] $$
 
 and 
 
-$$ \alpha_1 = \log \left[ \frac{(1-p_{12}-p_1 - p_2)\,p_{12}}{p_1 \, p_2} \right],$$
+$$ \alpha_1 = \log \left[ \frac{(1-p_{12}-p_1 - p_2) p_{12}}{p_1 p_2} \right],$$
 
 indicating that the two different parameterizations are equivalent. 
 
