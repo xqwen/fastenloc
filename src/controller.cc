@@ -9,12 +9,11 @@
 #include <omp.h> 
 #include <zlib.h>
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// Input Processing ///////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////// Input Processing ///////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
 
-///// eQTL with fine-mapping information
-
+/// eQTL with fine-mapping information
 void controller::load_eqtl(char *eqtl_file, char *tissue)
 {
 
@@ -130,11 +129,16 @@ void controller::load_eqtl(char *eqtl_file, char *tissue)
 }
 
 
+/// eQTL with summary statistics input (developing)  
+void controller::load_eqtl_summary(char *eqtl_file)
+{
+
+    fprintf(stderr, "Processing eQTL annotations (summary statistics)... \n");
+
+}
 
 
-///// GWAS with fine-mapping information
-
-
+/// GWAS with fine-mapping information
 void controller::load_gwas(char *gwas_file, char *tissue)
 {
 
@@ -265,9 +269,165 @@ void controller::load_gwas(char *gwas_file, char *tissue)
 }
 
 
+/// GWAS with summary statistics input (developing)
+void controller::load_gwas_summary(char *gwas_summary_file)
+{
+
+    fprintf(stderr, "Processing complex trait data ... \n");
+
+    istringstream ins;
+
+    string snp_id; // important
+    string sig_id;
+    double bhat;
+    double se;
+
+
+    double gwas_sum = 0;
+    int gwas_count = 0;
+    int format_status = 0;
+
+    vector<string> lines = readLines(string(gwas_summary_file));
+    for (vector<string>::iterator it = lines.begin(); it != lines.end(); ++it)
+    {
+        string line = *it;
+        ins.clear();
+        ins.str(line);
+
+        if (ins >> sig_id >> snp_id >> bhat >> se)
+        {
+            if (gwas_sig_index.find(sig_id) == gwas_sig_index.end())
+            {
+                gwas_sig_index[sig_id] = gwas_vec.size();
+                sigCluster gwas_cluster;
+                gwas_cluster.set_prior_var_vec(gwas_abf_prior_vec);
+                gwas_cluster.id = sig_id;
+                gwas_cluster.cpip = 0;
+                gwas_vec.push_back(gwas_cluster);
+            }
+
+            int index = gwas_sig_index[sig_id];
+            gwas_vec[index].snp_vec.push_back(snp_id);
+            gwas_vec[index].compute_BF(bhat, se);
+
+        }
+    }
+    
+    P_gwas = torus_estimate(gwas_vec);
+    for(int i=0;i<gwas_vec.size();i++){
+        gwas_vec[i].compute_pip(P_gwas);
+    }
+
+
+    for (int i = 0; i < gwas_vec.size(); i++)
+    {
+        for (int j = 0; j < gwas_vec[i].snp_vec.size(); j++)
+        {
+            string snp = gwas_vec[i].snp_vec[j];
+            gwas_pip_vec[snp_index[snp]] = gwas_vec[i].pip_vec[j];
+        }
+    }
+
+}
+
+
+/// GWA with processed summary statistics info by TORUS (Legacy code) 
+void controller::load_gwas_torus(char *gwas_file)
+{
+
+    fprintf(stderr, "Processing complex trait data ... \n");
+
+    istringstream ins;
+
+    string snp_id; // important
+    string sig_id;
+    double prior;
+    double posterior;
+
+    string delim = "|";
+
+    double gwas_sum = 0;
+    int gwas_count = 0;
+    int format_status = 0;
+
+    vector<string> lines = readLines(string(gwas_file));
+    for (vector<string>::iterator it = lines.begin(); it != lines.end(); ++it)
+    {
+        string line = *it;
+        ins.clear();
+        ins.str(line);
+
+        if (ins >> snp_id >> sig_id >> posterior)
+        {
+            format_status = 1;
+
+            if (snp_index.find(snp_id) == snp_index.end())
+            {
+                snp_index[snp_id] = snp_vec.size();
+                snp_vec.push_back(snp_id);
+            }
+
+            if (snp2gwas_locus.find(snp_id) == snp2gwas_locus.end())
+            {
+                snp2gwas_locus[snp_id] = sig_id;
+            }
+            else
+            {
+                snp2gwas_locus[snp_id] += "_" + sig_id;
+            }
+
+            if (gwas_sig_index.find(sig_id) == gwas_sig_index.end())
+            {
+                gwas_sig_index[sig_id] = gwas_vec.size();
+                sigCluster cluster;
+                cluster.id = sig_id;
+                cluster.cpip = 0;
+                gwas_vec.push_back(cluster);
+            }
+
+            int index = gwas_sig_index[sig_id];
+            gwas_vec[index].cpip += posterior;
+            gwas_vec[index].snp_vec.push_back(snp_id);
+            gwas_vec[index].pip_vec.push_back(posterior);
+            gwas_sum += posterior;
+            gwas_count++;
+        }
+    }
+    if (format_status == 0)
+    {
+        fprintf(stderr, "\nError: unexpected format in complex trait file \"%s\".\n\n", gwas_file);
+        exit(1);
+    }
+
+    if (gwas_sum == 0)
+    {
+        fprintf(stderr, "\nError: no complex trait associations detected in \"%s\". \n\n", gwas_file);
+        exit(1);
+    }
+
+    gwas_pip_vec = vector<double>(snp_vec.size(), 0.0);
+
+    for (int i = 0; i < gwas_vec.size(); i++)
+    {
+        for (int j = 0; j < gwas_vec[i].snp_vec.size(); j++)
+        {
+            string snp = gwas_vec[i].snp_vec[j];
+            gwas_pip_vec[snp_index[snp]] = gwas_vec[i].pip_vec[j];
+        }
+    }
+
+    if (total_snp < snp_vec.size())
+        total_snp = snp_vec.size();
+
+    fprintf(stderr, "read in %d SNPs (eQTL+gwas), %d GWAS loci, %.1f expected hits\n\n", int(snp_vec.size()), int(gwas_vec.size()), gwas_sum);
+
+    // estimated marginal priors
+    P_gwas = gwas_sum / total_snp;
+    P_eqtl = P_eqtl / total_snp;
+}
+
+
 /// combined GWAS eQTL input with only summary statistics (bhat, se_bhat)
-
-
 void controller::load_combined_summary(char* summary_input)
 {
     
@@ -356,14 +516,9 @@ void controller::load_combined_summary(char* summary_input)
 
 
 
-
-
-///////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// Data Pre-processing //////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////
-
-
-
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// Data Pre-processing //////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // for summary statistics input, after setting P_eqtl and p_gwas
@@ -448,9 +603,9 @@ void controller::init_pip(){
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// Enrichment Specification and Estimation ////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////// Enrichment Specification and Estimation //////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Set enrichment parameters without estimation procedure
 
@@ -700,9 +855,9 @@ void controller::enrich_est()
     return;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////// Computing and reporting colocalization probabilities ///////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////// Computing and reporting colocalization probabilities /////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /////// Main entry control function
 
@@ -954,9 +1109,9 @@ void controller::compute_coloc_prob_exact()
     fclose(fd3);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// Utility functions //////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////// Utility functions ////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // File parsing utility
 
@@ -1138,111 +1293,8 @@ void controller::set_prefix(char *str)
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////// Legacy Code (Non-default anymore but still working with explicit argument /////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//////// 1. input function
-
-// load GWAS data in TORUS format
-
-void controller::load_gwas_torus(char *gwas_file)
-{
-
-    fprintf(stderr, "Processing complex trait data ... \n");
-
-    istringstream ins;
-
-    string snp_id; // important
-    string sig_id;
-    double prior;
-    double posterior;
-
-    string delim = "|";
-
-    double gwas_sum = 0;
-    int gwas_count = 0;
-    int format_status = 0;
-
-    vector<string> lines = readLines(string(gwas_file));
-    for (vector<string>::iterator it = lines.begin(); it != lines.end(); ++it)
-    {
-        string line = *it;
-        ins.clear();
-        ins.str(line);
-
-        if (ins >> snp_id >> sig_id >> posterior)
-        {
-            format_status = 1;
-
-            if (snp_index.find(snp_id) == snp_index.end())
-            {
-                snp_index[snp_id] = snp_vec.size();
-                snp_vec.push_back(snp_id);
-            }
-
-            if (snp2gwas_locus.find(snp_id) == snp2gwas_locus.end())
-            {
-                snp2gwas_locus[snp_id] = sig_id;
-            }
-            else
-            {
-                snp2gwas_locus[snp_id] += "_" + sig_id;
-            }
-
-            if (gwas_sig_index.find(sig_id) == gwas_sig_index.end())
-            {
-                gwas_sig_index[sig_id] = gwas_vec.size();
-                sigCluster cluster;
-                cluster.id = sig_id;
-                cluster.cpip = 0;
-                gwas_vec.push_back(cluster);
-            }
-
-            int index = gwas_sig_index[sig_id];
-            gwas_vec[index].cpip += posterior;
-            gwas_vec[index].snp_vec.push_back(snp_id);
-            gwas_vec[index].pip_vec.push_back(posterior);
-            gwas_sum += posterior;
-            gwas_count++;
-        }
-    }
-    if (format_status == 0)
-    {
-        fprintf(stderr, "\nError: unexpected format in complex trait file \"%s\".\n\n", gwas_file);
-        exit(1);
-    }
-
-    if (gwas_sum == 0)
-    {
-        fprintf(stderr, "\nError: no complex trait associations detected in \"%s\". \n\n", gwas_file);
-        exit(1);
-    }
-
-    gwas_pip_vec = vector<double>(snp_vec.size(), 0.0);
-
-    for (int i = 0; i < gwas_vec.size(); i++)
-    {
-        for (int j = 0; j < gwas_vec[i].snp_vec.size(); j++)
-        {
-            string snp = gwas_vec[i].snp_vec[j];
-            gwas_pip_vec[snp_index[snp]] = gwas_vec[i].pip_vec[j];
-        }
-    }
-
-    if (total_snp < snp_vec.size())
-        total_snp = snp_vec.size();
-
-    fprintf(stderr, "read in %d SNPs (eQTL+gwas), %d GWAS loci, %.1f expected hits\n\n", int(snp_vec.size()), int(gwas_vec.size()), gwas_sum);
-
-    // estimated marginal priors
-    P_gwas = gwas_sum / total_snp;
-    P_eqtl = P_eqtl / total_snp;
-}
-
-/////// 2. compute colocalization probabilities
-
-// Approximate computation based on the algorithms presented in PLOS Genetics 2016; first implemented in version 1 & 2
 
 void controller::compute_coloc_prob_legacy()
 {
@@ -1396,126 +1448,8 @@ void controller::compute_coloc_prob_legacy()
     fclose(fd3);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-///////////// Code under active development  /////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
 
-void controller::load_eqtl_summary(char *eqtl_file, char *tissue)
-{
-
-    fprintf(stderr, "Processing eQTL annotations (summary statistics)... \n");
-
-    istringstream ins;
-
-    string target_tissue = string(tissue);
-
-    string chr;
-    string pos;
-    string snp_id; // important
-    string allele1;
-    string allele2;
-    string content;
-
-    string delim = "|";
-
-    int format_status = 0;
-
-    vector<string> lines = readLines(string(eqtl_file));
-    for (vector<string>::iterator it = lines.begin(); it != lines.end(); ++it)
-    {
-
-        string line = *it;
-
-        ins.clear();
-        ins.str(line);
-
-        if (ins >> chr >> pos >> snp_id >> allele1 >> allele2 >> content)
-        {
-
-            format_status = 1;
-
-            // passing content
-            size_t pos = 0;
-            string token;
-
-            do
-            {
-                pos = content.find(delim);
-                token = content.substr(0, pos);
-                size_t pos1 = token.find("@");
-                size_t pos2 = token.find("=");
-                size_t pos3 = token.find("(");
-                size_t pos4 = token.find(")");
-                string sig_id;
-                string tissue_type;
-                if (pos1 != string::npos && pos2 - pos1 > 1)
-                {
-                    tissue_type = token.substr(pos1 + 1, pos2 - pos1 - 1);
-                }
-
-                sig_id = token.substr(0, pos1);
-
-                // printf("sig id = %s %d %d\n",sig_id.c_str(),pos2,pos1);
-                string bhat = token.substr(pos2 + 1, pos3 - pos2 - 1);
-                string se = token.substr(pos3 + 1, pos4 - pos3 - 1);
-                // processing
-
-                if (strlen(tissue) == 0 || tissue_type.compare(target_tissue) == 0)
-                {
-
-                    if (snp_index.find(snp_id) == snp_index.end())
-                    {
-                        snp_index[snp_id] = snp_vec.size();
-                        snp_vec.push_back(snp_id);
-                    }
-
-                    if (eqtl_sig_index.find(sig_id) == eqtl_sig_index.end())
-                    {
-                        eqtl_sig_index[sig_id] = eqtl_vec.size();
-                        sigCluster cluster;
-                        cluster.id = sig_id;
-                        cluster.cpip = 0;
-                        eqtl_vec.push_back(cluster);
-                    }
-
-                    int index = eqtl_sig_index[sig_id];
-
-                    // std::cout << snp_id<< "    "<< sig_id<<"  "<< tissue_type<<"   "<< pip << " "<< sig_pip<< std::endl;
-                }
-
-                content.erase(0, pos + delim.length());
-            } while (pos != string::npos);
-        }
-    }
-
-    if (format_status == 0)
-    {
-        fprintf(stderr, "\nError: unexpected format in eQTL annotation file \"%s\".\n\n", eqtl_file);
-        exit(1);
-    }
-
-    double sum = 0;
-    for (int i = 0; i < eqtl_vec.size(); i++)
-    {
-        sum += eqtl_vec[i].cpip;
-    }
-
-    if (sum == 0)
-    {
-        fprintf(stderr, "\nError: no eQTL annotated in \"%s\". \n\n", eqtl_file);
-        exit(1);
-    }
-
-    fprintf(stderr, "read in %d SNPs, %d eQTL signal clusters, %.1f expected eQTLs\n\n", int(snp_vec.size()), int(eqtl_vec.size()), sum);
-
-    P_eqtl = sum;
-}
-
-void controller::load_gwas_summary(char *gwas_file, char *tissue)
-{
-}
-
-// EM algorithm to estimate marginal prior, for summary statistics input only
+// EM algorithm to estimate marginal prior from summary statistics input only
 
 double controller::torus_estimate(vector<sigCluster> &sig_vec)
 {

@@ -1,8 +1,8 @@
-using namespace std;
 #include <string>
 #include <vector>
 #include <gsl/gsl_rng.h>
 
+using namespace std;
 class sigCluster {
 
     public:

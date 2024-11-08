@@ -1,10 +1,9 @@
-using namespace std;
-
 #include "sigCluster.h"
 #include <vector>
 #include <map>
 #include <string>
 
+using namespace std;
 class controller
 {
 
@@ -130,11 +129,11 @@ public:
     void set_enrich_params(double a0, double a1);
 
     void load_eqtl(char *eqtl_file, char *tissue);
-    void load_eqtl_summary(char *eqtl_file, char *tissue);
+    void load_eqtl_summary(char *eqtl_file);
 
 
     void load_gwas(char *gwas_file, char *tissue = 0);
-    void load_gwas_summary(char *gwas_file, char *tissue = 0);
+    void load_gwas_summary(char *gwas_file);
 
     void load_combined_summary(char *summary_file);
     void set_abf_piror_vec(vector<double> & eqtl_prior_vec, vector<double> & gwas_prior_vec);
