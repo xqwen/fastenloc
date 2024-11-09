@@ -1,14 +1,14 @@
-# fastENLOC: fast enrichment estimation aided colocalization analysis
+# FastENLOC: Fast Enrichment Estimation Aided Colocalization Analysis
 
 **Version 3.1** 
 
 
-This repository contains the software implementation of fastENLOC, which enables integrative genetic association analysis of molecular QTL data and GWAS data. The statistical model and the key computational procedures are described in \[1\], \[2\], \[3\], and \[4\].
+This repository contains the software implementation of FastENLOC, which enables integrative genetic association analysis of molecular QTL data and GWAS data. The statistical model and the key computational procedures are described in \[1\], \[2\], \[3\], and \[4\].
 
 For questions/comments regarding the software package, please contact Xiaoquan (William) Wen (xwen at umich dot edu).
 
 
-## New features in version 3.1
+## New Features in Version 3.1
 
 - Unified VCF input format for both complex- and molecular-trait data
 - Approximate computation with only summary-level data
@@ -22,37 +22,37 @@ For questions/comments regarding the software package, please contact Xiaoquan (
 Software distributed under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](http://www.gnu.org/licenses/gpl-3.0.en.html) for more details.
 
 
-## Quick start
+## Quick Start
 
 A detailed tutorial is provided in [``tutorial``](https://github.com/xqwen/fastenloc/tree/master/tutorial/) directory.
 
 
-### Running with fine-mapping results
+### Running with Fine-mapping Results
 
-For optimal results, we recommend performing multi-SNP probabilistic fine-mapping prior to running the fastENLOC analysis. The fine-mapping outputs should be organized into two VCF files, one for each trait. (Utilities are available to convert DAP-G and SuSiE fine-mapping results to the fastENLOC-compatible VCF format.)
+For optimal results, we recommend performing multi-SNP probabilistic fine-mapping prior to running the FastENLOC analysis. The fine-mapping outputs should be organized into two VCF files, one for each trait. (Utilities are available to convert DAP-G and SuSiE fine-mapping results to the FastENLOC-compatible VCF format.)
 
-To run the fastENLOC analysis, use the following command:
+To run the FastENLOC analysis, use the following command:
 ```
-fastenloc -g gwas.vcf.gz -e eqtl.vcf.gz
+fastenloc -g gwas.vcf.gz -e eqtl.vcf.gz -tv total_variants
 ```
-If you are using the legacy fastENLOC GWAS format (version 1 or 2) for the GWAS file, use this command instead:
+If you are using the legacy FastENLOC GWAS format (version 1 or 2) for the GWAS file, use this command instead:
 ```
-fastenloc -go gwas.old_format.vcf.gz -e eqtl.vcf.gz
-```
-
-
-### Running with summary-statistic input
-
-fastENLOC can also operate with minimal summary statistics, specifically the estimated SNP genetic effects and corresponding standard errors from single-SNP analyses of molecular and complex traits.
-
-For this approach, the input should be organized into a single tabular file. To initiate the fastENLOC analysis, use the following command:
-```
-fastenloc -sum summary_stats_file
+fastenloc -go gwas.old_format.vcf.gz -e eqtl.vcf.gz -tv total_variants
 ```
 
 
-## GTEx v8 multi-tissue eQTL annotations for fastENLOC
-We provide pre-formatted GTEx v8 eQTL annotations (fine-mapped using DAP-G) in the fastENLOC-compatible VCF format.
+### Running with Summary Statistic Input
+
+FastENLOC can also operate with minimal summary statistics, specifically the estimated SNP genetic effects and corresponding standard errors from single-SNP analyses of molecular and complex traits.
+
+For this approach, the input should be organized into a single tabular file. To initiate the FastENLOC analysis, use the following command:
+```
+fastenloc -sum summary_stats_file -tv total_variants
+```
+
+
+## GTEx v8 Multi-tissue eQTL Annotations for FastENLOC
+We provide pre-formatted GTEx v8 eQTL annotations (fine-mapped using DAP-G) in the FastENLOC-compatible VCF format.
 
 +  [Multi-tissue eQTL annotation with hg38 position ID](https://drive.google.com/open?id=1kfH_CffxyCtZcx3z7k63rIARNidLv1_P)
 +  [Multi-tissue eQTL annotation with rs ID](https://drive.google.com/open?id=1rSaHenk8xOFtQo7VuDZevRkjUz6iwuj0)

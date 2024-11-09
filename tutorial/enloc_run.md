@@ -4,7 +4,7 @@
 
 ##  Running with Probabilistic Fine-mapping Input
 
-The command line syntax to run FastENLOC with the probabilistic fine-mapping input is
+The command line syntax to run fastENLOC with the probabilistic fine-mapping input is
 
 ```
 fastenloc -eqtl eqtl_annotation -gwas gwas_annotation -total_variants total_number_of_variants [-t tissue_name] 
@@ -19,7 +19,7 @@ Required options:
 
 ### Running with Legacy GWAS Annotation Files
 
-GWAS annotation files formatted for previous versions of FastENLOC remain compatible with newer versions (3.0 and above). To use these legacy-format files, specify the option ``-go gwas_input_legacy_format`` (instead of ``-gwas``) to indicate the older GWAS annotation format.
+GWAS annotation files formatted for previous versions of fastENLOC remain compatible with newer versions (3.0 and above). To use these legacy-format files, specify the option ``-go gwas_input_legacy_format`` (instead of ``-gwas``) to indicate the older GWAS annotation format.
 
 
 ## Running with Summary Statistics Input

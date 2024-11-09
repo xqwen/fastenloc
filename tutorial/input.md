@@ -5,7 +5,7 @@
 
 FastENLOC analysis requires summary results from genetic association analyses of a molecular trait and a complex trait to perform colocalization analysis. We refer to these summary results as eQTL and GWAS information for the molecular trait and complex trait analyses, respectively.
 
-The current version of fastENLOC supports two types of summary information:
+The current version of FastENLOC supports two types of summary information:
 
 1. **Single-SNP Summary Statistics Input**: summary statistics from single-SNP association analyses, specifically the estimated effect size, beta, and its standard error, se(beta), for each SNP in each trait.
 
@@ -13,7 +13,7 @@ The current version of fastENLOC supports two types of summary information:
 
 The probabilistic fine-mapping input is preferred, as it generally provides more accurate results for colocalization analysis, even though the computational cost for obtaining the single-SNP summary statistics input is lower.
 
-All input files can be either compressed (by gzip) or uncompressed, fastENLOC can detect the format automatically.
+All input files can be either compressed (by gzip) or uncompressed, FastENLOC can detect the format automatically.
 
 
 
@@ -30,13 +30,13 @@ An example input file can be downloaded from [here]().
 
 ## Probabilistic fine-mapping input
 
-The input for probabilistic fine-mapping follows the standard VCF format, where association information for colocalization analysis is recorded in the INFO field. Separate files are required for molecular and complex traits. Most importantly, fastENLOC expects molecular and complex trait tiles to have matching variant IDs.
+The input for probabilistic fine-mapping follows the standard VCF format, where association information for colocalization analysis is recorded in the INFO field. Separate files are required for molecular and complex traits. Most importantly, FastENLOC expects molecular and complex trait tiles to have matching variant IDs.
 An example input line is shown below:
 ```
 chr1	115746	chr1_115746_C_T_b38	C	T	ENSG00000269981:1@Spleen=2.00812e-01[9.997e-01:4]
 ```
 
-The first five columns represent the chromosome, position, SNP ID, reference allele, and alternative allele, consistent with a standard VCF file. Note that fastENLOC uses only the SNP ID information and does not verify or utilize the position or allele information.
+The first five columns represent the chromosome, position, SNP ID, reference allele, and alternative allele, consistent with a standard VCF file. Note that FastENLOC uses only the SNP ID information and does not verify or utilize the position or allele information.
 
 The INFO field has the following format:
 ```
@@ -57,7 +57,7 @@ There is no restriction on the number of annotation entries that can be concaten
 
 ### Use pre-computed GTEx multi-tissue eQTL annotation
 
-Simply download appropriate vcf files below. Need to specify ``-tissue`` command line option in fastENLOC analysis. 
+Simply download appropriate vcf files below. Need to specify ``-tissue`` command line option in FastENLOC analysis. 
 
 +  [Multi-tissue eQTL annotation with hg38 position ID](https://drive.google.com/open?id=1kfH_CffxyCtZcx3z7k63rIARNidLv1_P)
 +  [Multi-tissue eQTL annotation with rs ID](https://drive.google.com/open?id=1rSaHenk8xOFtQo7VuDZevRkjUz6iwuj0)
@@ -69,12 +69,12 @@ When making complex trait file, make sure variant IDs match the corresponding QT
 ### Construct fine-mapping input from DAP-G and SuSiE results
 
 The probabilistic fine-mapping input files can be constructed using the utility scripts provided in the [utility](../utility/) directory. 
-Currently, ``fastENLOC`` supports ``DAP`` and ``SuSiE`` as both provide signal cluster/credible set information required by the fastENLOC colocalization analysis.  
+Currently, ``FastENLOC`` supports ``DAP`` and ``SuSiE`` as both provide signal cluster/credible set information required by the FastENLOC colocalization analysis.  
 Both ``DAP`` and ``SuSiE`` analyze a pre-defined genomic region, i.e., a locus, at a time. 
 
-Upon completing fine-mapping analysis, following the procedures described below to construct the probabilistic fine-mapping input for fastENLOC,
+Upon completing fine-mapping analysis, following the procedures described below to construct the probabilistic fine-mapping input for FastENLOC,
 
-1. Name each fine-mapping output file by ``locus_id.postfix``, where ``locus_id`` is the required entry in the fastENLOC input file.  The postfix can be arbitrary but it is required. The utility takes the leading string before the delimiter ``.`` as the locus id.
+1. Name each fine-mapping output file by ``locus_id.postfix``, where ``locus_id`` is the required entry in the FastENLOC input file.  The postfix can be arbitrary but it is required. The utility takes the leading string before the delimiter ``.`` as the locus id.
 2. Organize the fine-mapping output files of all loci into a single directory ``fm_rst_dir``. The utility tool assume all files within the directories are fine-mapping output files. Thus avoid place unrelated files into ``fm_rst_dir``.
 3. Provide a VCF file to all annotate all variant's position and allele information. No INFO field is expected or used by the utility tool. 
 
