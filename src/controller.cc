@@ -276,7 +276,7 @@ void controller::load_gwas(char *gwas_file, char *tissue)
 void controller::load_gwas_summary(char *gwas_summary_file)
 {
 
-    fprintf(stderr, "Processing complex trait data ... \n\n");
+    fprintf(stderr, "Processing complex trait data (summary statistics)... \n\n");
 
     istringstream ins;
 
@@ -289,6 +289,7 @@ void controller::load_gwas_summary(char *gwas_summary_file)
     double gwas_sum = 0;
     int gwas_count = 0;
     int format_status = 0;
+    int snp_size = 0;
 
     vector<string> lines = readLines(string(gwas_summary_file));
     for (vector<string>::iterator it = lines.begin(); it != lines.end(); ++it)
@@ -299,6 +300,23 @@ void controller::load_gwas_summary(char *gwas_summary_file)
 
         if (ins >> sig_id >> snp_id >> bhat >> se)
         {
+
+            if (snp_index.find(snp_id) == snp_index.end())
+            {
+                snp_index[snp_id] = snp_vec.size();
+                snp_vec.push_back(snp_id);
+            }
+
+            // new GWAS locus
+            if (snp2gwas_locus.find(snp_id) == snp2gwas_locus.end())
+            {
+                snp2gwas_locus[snp_id] = sig_id;
+            }
+            else
+            {
+                snp2gwas_locus[snp_id] += "_" + sig_id;
+            }
+
             if (gwas_sig_index.find(sig_id) == gwas_sig_index.end())
             {
                 gwas_sig_index[sig_id] = gwas_vec.size();
@@ -309,19 +327,33 @@ void controller::load_gwas_summary(char *gwas_summary_file)
                 gwas_vec.push_back(gwas_cluster);
             }
 
+
             int index = gwas_sig_index[sig_id];
             gwas_vec[index].snp_vec.push_back(snp_id);
             gwas_vec[index].compute_BF(bhat, se);
+            snp_size++;
 
         }
     }
-    
+
+    if (total_snp == -1)
+        total_snp = snp_size;
+
+    P_eqtl = P_eqtl/total_snp;    
+
     P_gwas = torus_estimate(gwas_vec);
-    for(int i=0;i<gwas_vec.size();i++){
+
+
+
+    for (int i = 0; i < gwas_vec.size(); i++)
+    {
         gwas_vec[i].compute_pip(P_gwas);
     }
-
-
+    
+    fprintf(stderr, "    * read in %d SNPs, %d GWAS loci, %.1f expected hits\n\n", snp_size, int(gwas_vec.size()), gwas_sum); 
+    fprintf(stderr, "    * estimated GWAS frequency = %9.3eq\n\n", P_gwas);
+    // init GWAS pip
+     gwas_pip_vec = vector<double>(snp_vec.size(), 0.0);
     for (int i = 0; i < gwas_vec.size(); i++)
     {
         for (int j = 0; j < gwas_vec[i].snp_vec.size(); j++)
@@ -330,11 +362,9 @@ void controller::load_gwas_summary(char *gwas_summary_file)
             gwas_pip_vec[snp_index[snp]] = gwas_vec[i].pip_vec[j];
         }
     }
-
 }
 
-
-/// GWA with processed summary statistics info by TORUS (Legacy code) 
+/// GWA with processed summary statistics info by TORUS (Legacy code)
 void controller::load_gwas_torus(char *gwas_file)
 {
 
@@ -419,7 +449,7 @@ void controller::load_gwas_torus(char *gwas_file)
         }
     }
 
-    if(total_snp == -1)
+    if (total_snp == -1)
         total_snp = snp_vec.size();
 
     if (total_snp < snp_vec.size())
@@ -432,15 +462,13 @@ void controller::load_gwas_torus(char *gwas_file)
     P_eqtl = P_eqtl / total_snp;
 }
 
-
 /// combined GWAS eQTL input with only summary statistics (bhat, se_bhat)
-void controller::load_combined_summary(char* summary_input)
+void controller::load_combined_summary(char *summary_input)
 {
-    
+
     use_sum_stat = 1;
 
     fprintf(stderr, "Processing combined summary statistics input ... \n\n");
-
 
     istringstream ins;
 
@@ -461,7 +489,7 @@ void controller::load_combined_summary(char* summary_input)
         if (ins >> sig_id >> snp_id >> bhat_e >> se_e >> bhat_g >> se_g)
         {
 
-            snp_id = sig_id+":"+snp_id;
+            snp_id = sig_id + ":" + snp_id;
 
             if (snp_index.find(snp_id) == snp_index.end())
             {
@@ -507,48 +535,45 @@ void controller::load_combined_summary(char* summary_input)
             index = gwas_sig_index[sig_id];
             gwas_vec[index].snp_vec.push_back(snp_id);
             gwas_vec[index].compute_BF(bhat_g, se_g);
-
-
         }
     }
 
     // legacy GWAS format
-    fprintf(stderr, "    * read in %d SNPs, %d loci \n\n", int(snp_vec.size()), int(gwas_vec.size()) );
+    fprintf(stderr, "    * read in %d SNPs, %d loci \n\n", int(snp_vec.size()), int(gwas_vec.size()));
 
-    if(total_snp == -1)
+    if (total_snp == -1)
         total_snp = snp_vec.size();
-
-
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// Data Pre-processing //////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 // for summary statistics input, after setting P_eqtl and p_gwas
-void controller::init_pip(){
+void controller::init_pip()
+{
 
-   if(P_eqtl <0){ 
+    if (P_eqtl < 0)
+    {
         P_eqtl = torus_estimate(eqtl_vec);
-        fprintf(stderr, "    -estimated eQTL frequency = %9.3e\n", P_eqtl);
-   }
+        fprintf(stderr, "    * estimated eQTL frequency = %9.3e\n", P_eqtl);
+    }
 
-    if(P_gwas < 0) {
+    if (P_gwas < 0)
+    {
         P_gwas = torus_estimate(gwas_vec);
-        fprintf(stderr, "    -estimated GWAS frequency = %9.3e\n", P_gwas);
+        fprintf(stderr, "    * estimated GWAS frequency = %9.3e\n", P_gwas);
     }
 
     fprintf(stderr, "\n");
 
-
-    for(int i=0;i<eqtl_vec.size();i++){
+    for (int i = 0; i < eqtl_vec.size(); i++)
+    {
         eqtl_vec[i].compute_pip(P_eqtl);
     }
 
-    for(int i=0;i<gwas_vec.size();i++){
+    for (int i = 0; i < gwas_vec.size(); i++)
+    {
         gwas_vec[i].compute_pip(P_gwas);
     }
 
@@ -572,7 +597,7 @@ void controller::init_pip(){
             {
                 string snp = eqtl_vec[i].snp_vec[k];
                 stringstream sstm;
-                sstm<< locus_id << ":1@="<<eqtl_vec[i].pip_vec[k]<< "["<<cpip<<"]";
+                sstm << locus_id << ":1@=" << eqtl_vec[i].pip_vec[k] << "[" << cpip << "]";
                 gzprintf(gz_eqtl_file, "chrN\t%d\t%s\tX\tY\t%s\n", pos++, snp.c_str(), sstm.str().c_str());
             }
         }
@@ -589,7 +614,7 @@ void controller::init_pip(){
             {
                 string snp = gwas_vec[i].snp_vec[k];
                 stringstream sstm;
-                sstm<< locus_id << ":1@="<<gwas_vec[i].pip_vec[k]<< "["<<cpip<<"]";
+                sstm << locus_id << ":1@=" << gwas_vec[i].pip_vec[k] << "[" << cpip << "]";
                 gzprintf(gz_gwas_file, "chrN\t%d\t%s\tX\tY\t%s\n", pos++, snp.c_str(), sstm.str().c_str());
             }
         }
@@ -629,7 +654,6 @@ void controller::set_enrich_params(double a0, double a1)
     p1 = (1 - P_eqtl) * exp(a0) / (1 + exp(a0));
     p2 = P_eqtl / (1 + exp(a0 + a1));
     p12 = P_eqtl * exp(a0 + a1) / (1 + exp(a0 + a1));
-
 }
 
 // Set enrichment parameters without estimation procedure: p_1 = p(gwas only), p_2 = p(eqtl only), p12 = p( colocalization )
@@ -657,7 +681,7 @@ void controller::enrich_est()
 {
 
     fprintf(stderr, "Performing enrichment analysis ...\n\n");
-    
+
     const gsl_rng_type *T;
     gsl_rng *r;
     gsl_rng_env_setup();
@@ -696,7 +720,6 @@ void controller::enrich_est()
             }
         }
 
-
         vector<double> rst = run_EM(eqtl_sample);
 
 #pragma omp critical
@@ -710,7 +733,6 @@ void controller::enrich_est()
     }
 
     // MI post-processing
-
 
     // Detect and remove outliers from MI results
 
@@ -901,7 +923,6 @@ void controller::compute_coloc_prob_exact()
     fprintf(fd2, "Signal\tNum_SNP\tCPIP_qtl\tCPIP_gwas_marginal\tCPIP_gwas_qtl_prior\tRCP\tLCP\n");
     fprintf(fd3, "Gene\t\tGRCP\tGLCP\n");
 
-
 #pragma omp parallel for num_threads(nthread)
 
     for (int i = 0; i < eqtl_vec.size(); i++)
@@ -1023,9 +1044,9 @@ void controller::compute_coloc_prob_exact()
                 double prob = coloc_config[m][n] / NC;
 
                 if (m == n)
-                {   
+                {
                     // correction for small colocalization prob when not all SNPs available
-                    if(prob<p12&&!use_sum_stat)
+                    if (prob < p12 && !use_sum_stat)
                         prob = p12;
 
                     RCP += prob;
@@ -1038,8 +1059,8 @@ void controller::compute_coloc_prob_exact()
         eqtl_vec[i].coloc_prob = RCP;
         eqtl_vec[i].locus_coloc_prob = LCP;
 
-        //fprintf(stderr, "Locus %s:  RCP = %7.3e  LCP = %7.3e\n", eqtl_vec[i].id.c_str(), RCP, LCP);
-        display_progress(i+1,eqtl_vec.size());
+        // fprintf(stderr, "Locus %s:  RCP = %7.3e  LCP = %7.3e\n", eqtl_vec[i].id.c_str(), RCP, LCP);
+        display_progress(i + 1, eqtl_vec.size());
 
         double gprob_cpip_e = 0; // GWAS cluster/locus cpip with eQTL annotation
 
@@ -1462,7 +1483,6 @@ void controller::compute_coloc_prob_legacy()
     fclose(fd3);
 }
 
-
 // EM algorithm to estimate marginal prior from summary statistics input only
 
 double controller::torus_estimate(vector<sigCluster> &sig_vec)
@@ -1489,16 +1509,20 @@ double controller::torus_estimate(vector<sigCluster> &sig_vec)
     }
 }
 
-
-void controller::display_progress(int progress, int total, int barwidth) {
+void controller::display_progress(int progress, int total, int barwidth)
+{
     float percentage = static_cast<float>(progress) / total;
     int pos = static_cast<int>(barwidth * percentage);
-    
+
     cerr << "[";
-    for (int i = 0; i < barwidth; ++i) {
-        if (i < pos) cerr << "=";
-        else if (i == pos) cerr << ">";
-        else cerr << " ";
+    for (int i = 0; i < barwidth; ++i)
+    {
+        if (i < pos)
+            cerr << "=";
+        else if (i == pos)
+            cerr << ">";
+        else
+            cerr << " ";
     }
     cerr << "] " << int(percentage * 100.0) << "%\r";
     cerr.flush();

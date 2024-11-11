@@ -11,7 +11,7 @@ int show_banner(){
 
     fprintf(stderr, "\t\t==================================================================\n\n");
     fprintf(stderr, "\t\t                    FastENLOC (v3.1)                        \n\n");
-    fprintf(stderr, "\t\t                      November, 2024                              \n\n"); 
+    fprintf(stderr, "\t\t              release date: November, 2024            \n\n"); 
     fprintf(stderr, "\t\t==================================================================\n\n\n");
     fprintf(stderr, "\n\n");
     return 1;
@@ -99,6 +99,12 @@ int main(int argc, char **argv){
         if(strcmp(argv[i], "-go")==0){
             strcpy(gwas_file,argv[++i]);
             gwas_format = 2;
+            continue;
+        }
+
+         if(strcmp(argv[i], "-gs")==0){
+            strcpy(gwas_file,argv[++i]);
+            gwas_format = 3;
             continue;
         }
 
@@ -348,6 +354,13 @@ int main(int argc, char **argv){
         if (gwas_format == 2)
             con.load_gwas_torus(gwas_file);
 
+        if (gwas_format == 3)
+        {
+            vector<double> prior_vec1;
+            vector<double> prior_vec2;
+            con.set_abf_piror_vec(prior_vec1, prior_vec2);
+            con.load_gwas_summary(gwas_file);
+        }
     }
 
     // set coloc computational option
@@ -357,9 +370,9 @@ int main(int argc, char **argv){
     con.set_prefix(prefix);
     con.set_output_thresh(output_thresh);
 
-
     // start enrichment analysis
-    if(run_enrich){
+    if (run_enrich)
+    {
         con.enrich_est();
     }
 
