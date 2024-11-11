@@ -17,7 +17,7 @@
 void controller::load_eqtl(char *eqtl_file, char *tissue)
 {
 
-    fprintf(stderr, "Processing eQTL annotations ... \n");
+    fprintf(stderr, "Processing eQTL annotations ... \n\n");
 
     istringstream ins;
 
@@ -123,7 +123,7 @@ void controller::load_eqtl(char *eqtl_file, char *tissue)
         exit(1);
     }
 
-    fprintf(stderr, "read in %d SNPs, %d eQTL signal clusters, %.1f expected eQTLs\n\n", int(snp_vec.size()), int(eqtl_vec.size()), sum);
+    fprintf(stderr, "    * read in %d SNPs, %d eQTL signal clusters, %.1f expected eQTLs\n\n", int(snp_vec.size()), int(eqtl_vec.size()), sum);
 
     P_eqtl = sum;
 }
@@ -133,7 +133,7 @@ void controller::load_eqtl(char *eqtl_file, char *tissue)
 void controller::load_eqtl_summary(char *eqtl_file)
 {
 
-    fprintf(stderr, "Processing eQTL annotations (summary statistics)... \n");
+    //fprintf(stderr, "Processing eQTL annotations (summary statistics)... \n");
 
 }
 
@@ -142,7 +142,7 @@ void controller::load_eqtl_summary(char *eqtl_file)
 void controller::load_gwas(char *gwas_file, char *tissue)
 {
 
-    fprintf(stderr, "Processing complex trait data ... \n");
+    fprintf(stderr, "Processing complex trait data ... \n\n");
 
     istringstream ins;
 
@@ -258,10 +258,13 @@ void controller::load_gwas(char *gwas_file, char *tissue)
         }
     }
 
+    if(total_snp == -1)
+        total_snp = snp_vec.size();
+
     if (total_snp < snp_vec.size())
         total_snp = snp_vec.size();
 
-    fprintf(stderr, "read in %d SNPs (eQTL+gwas), %d GWAS loci, %.1f expected hits\n\n", int(snp_vec.size()), int(gwas_vec.size()), gwas_sum);
+    fprintf(stderr, "    * read in %d SNPs (eQTL+gwas), %d GWAS loci, %.1f expected hits\n\n", int(snp_vec.size()), int(gwas_vec.size()), gwas_sum);
 
     // estimated marginal priors
     P_gwas = gwas_sum / total_snp;
@@ -273,7 +276,7 @@ void controller::load_gwas(char *gwas_file, char *tissue)
 void controller::load_gwas_summary(char *gwas_summary_file)
 {
 
-    fprintf(stderr, "Processing complex trait data ... \n");
+    fprintf(stderr, "Processing complex trait data ... \n\n");
 
     istringstream ins;
 
@@ -335,7 +338,7 @@ void controller::load_gwas_summary(char *gwas_summary_file)
 void controller::load_gwas_torus(char *gwas_file)
 {
 
-    fprintf(stderr, "Processing complex trait data ... \n");
+    fprintf(stderr, "Processing complex trait data ... \n\n");
 
     istringstream ins;
 
@@ -416,10 +419,13 @@ void controller::load_gwas_torus(char *gwas_file)
         }
     }
 
+    if(total_snp == -1)
+        total_snp = snp_vec.size();
+
     if (total_snp < snp_vec.size())
         total_snp = snp_vec.size();
 
-    fprintf(stderr, "read in %d SNPs (eQTL+gwas), %d GWAS loci, %.1f expected hits\n\n", int(snp_vec.size()), int(gwas_vec.size()), gwas_sum);
+    fprintf(stderr, "    * read in %d SNPs (eQTL+gwas), %d GWAS loci, %.1f expected hits\n\n", int(snp_vec.size()), int(gwas_vec.size()), gwas_sum);
 
     // estimated marginal priors
     P_gwas = gwas_sum / total_snp;
@@ -433,7 +439,7 @@ void controller::load_combined_summary(char* summary_input)
     
     use_sum_stat = 1;
 
-    fprintf(stderr, "Processing eQTL + GWAS combined summary statistics input ... \n");
+    fprintf(stderr, "Processing combined summary statistics input ... \n\n");
 
 
     istringstream ins;
@@ -507,9 +513,10 @@ void controller::load_combined_summary(char* summary_input)
     }
 
     // legacy GWAS format
-    fprintf(stderr, "read in %d SNPs, %d loci \n\n", int(snp_vec.size()), int(gwas_vec.size()) );
+    fprintf(stderr, "    * read in %d SNPs, %d loci \n\n", int(snp_vec.size()), int(gwas_vec.size()) );
 
-    total_snp = snp_vec.size();
+    if(total_snp == -1)
+        total_snp = snp_vec.size();
 
 
 }
@@ -526,14 +533,15 @@ void controller::init_pip(){
 
    if(P_eqtl <0){ 
         P_eqtl = torus_estimate(eqtl_vec);
-        printf("Estimated eQTL frequency = %9.3e\n", P_eqtl);
+        fprintf(stderr, "    -estimated eQTL frequency = %9.3e\n", P_eqtl);
    }
 
     if(P_gwas < 0) {
         P_gwas = torus_estimate(gwas_vec);
-        printf("Estimated GWAS frequency = %9.3e\n", P_gwas);
+        fprintf(stderr, "    -estimated GWAS frequency = %9.3e\n", P_gwas);
     }
 
+    fprintf(stderr, "\n");
 
 
     for(int i=0;i<eqtl_vec.size();i++){
@@ -648,6 +656,8 @@ void controller::set_enrich_params(double p1_, double p2_, double p12_)
 void controller::enrich_est()
 {
 
+    fprintf(stderr, "Performing enrichment analysis ...\n\n");
+    
     const gsl_rng_type *T;
     gsl_rng *r;
     gsl_rng_env_setup();
@@ -685,7 +695,10 @@ void controller::enrich_est()
                 eqtl_sample_vec[k] += 1;
             }
         }
+
+
         vector<double> rst = run_EM(eqtl_sample);
+
 #pragma omp critical
         {
             a0_vec[k] = rst[0];
@@ -693,10 +706,11 @@ void controller::enrich_est()
             v0_vec[k] = rst[2];
             v1_vec[k] = rst[3];
         }
-        fprintf(stderr, "Imputation round %2d is completed\n", k + 1);
+        fprintf(stderr, "    + imputation round %2d is completed\n", k + 1);
     }
 
     // MI post-processing
+
 
     // Detect and remove outliers from MI results
 
@@ -744,7 +758,7 @@ void controller::enrich_est()
         if (remove_count > 0)
         {
 
-            fprintf(stderr, "\n*** %d outlying MI results removed ***\n", remove_count);
+            fprintf(stderr, "\n    *** %d outlying MI results removed ***\n", remove_count);
             ImpN -= remove_count;
 
             a1_vec = a1_vec_temp;
@@ -754,7 +768,7 @@ void controller::enrich_est()
         }
     }
 
-    fprintf(stderr, "\nEffective MI numbers: %d", ImpN);
+    fprintf(stderr, "\n    * effective MI numbers: %d\n\n", ImpN);
     // main processing
 
     string mi_file = prefix + string("enloc.mi.out");
@@ -848,7 +862,6 @@ void controller::enrich_est()
     // pi1_ne =  exp(a0_est)/(1+exp(a0_est));
     // printf("%7.3e  %7.3e     %7.3e\n", pi1_e, pi1_ne, pi1);
 
-    fprintf(stderr, "\nEnrichment analysis is completed\n");
     // fprintf(stderr, "pi1 = %7.3e  pi1_e = %7.3e pi1_ne = %7.3e\t\tp_eqtl = %7.3e\n", P_gwas, pi1_e, pi1_ne, P_eqtl);
 
     gsl_rng_free(r);
@@ -1025,7 +1038,8 @@ void controller::compute_coloc_prob_exact()
         eqtl_vec[i].coloc_prob = RCP;
         eqtl_vec[i].locus_coloc_prob = LCP;
 
-        fprintf(stderr, "Locus %s:  RCP = %7.3e  LCP = %7.3e\n", eqtl_vec[i].id.c_str(), RCP, LCP);
+        //fprintf(stderr, "Locus %s:  RCP = %7.3e  LCP = %7.3e\n", eqtl_vec[i].id.c_str(), RCP, LCP);
+        display_progress(i+1,eqtl_vec.size());
 
         double gprob_cpip_e = 0; // GWAS cluster/locus cpip with eQTL annotation
 
@@ -1473,4 +1487,19 @@ double controller::torus_estimate(vector<sigCluster> &sig_vec)
 
         pi = new_pi;
     }
+}
+
+
+void controller::display_progress(int progress, int total, int barwidth) {
+    float percentage = static_cast<float>(progress) / total;
+    int pos = static_cast<int>(barwidth * percentage);
+    
+    cerr << "[";
+    for (int i = 0; i < barwidth; ++i) {
+        if (i < pos) cerr << "=";
+        else if (i == pos) cerr << ">";
+        else cerr << " ";
+    }
+    cerr << "] " << int(percentage * 100.0) << "%\r";
+    cerr.flush();
 }

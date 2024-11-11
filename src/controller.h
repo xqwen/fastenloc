@@ -160,4 +160,5 @@ private:
     vector<string> readLines(const string& filename); 
 
     vector<double> run_EM(vector<int> &eqtl_sample);
+    void display_progress(int progress, int total, int barwidth = 50);
 };

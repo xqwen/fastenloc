@@ -10,9 +10,10 @@
 int show_banner(){
 
     fprintf(stderr, "\t\t==================================================================\n\n");
-    fprintf(stderr, "\t\t                     fastENLOC (v3.1)                        \n\n");
-    fprintf(stderr, "\t\t                      September, 2024                              \n\n"); 
+    fprintf(stderr, "\t\t                    FastENLOC (v3.1)                        \n\n");
+    fprintf(stderr, "\t\t                      November, 2024                              \n\n"); 
     fprintf(stderr, "\t\t==================================================================\n\n\n");
+    fprintf(stderr, "\n\n");
     return 1;
 }
 
@@ -80,7 +81,9 @@ int main(int argc, char **argv){
     unsigned long random_seed = 0;
 
     show_banner();
-
+  
+    /// Taking user command-line input
+   
     for(int i=1;i<argc;i++){
 
         if(strcmp(argv[i], "-e")==0 || strcmp(argv[i], "-eqtl")==0){
@@ -248,7 +251,7 @@ int main(int argc, char **argv){
 
 
 
-
+    // pre-processing/convertion of user input
 
     // default shrinkage
     double pv = 1;
@@ -263,180 +266,106 @@ int main(int argc, char **argv){
         pv = 1 / shrinkage;
     }
 
-    // input single-SNP summary statistics
 
-    if(strlen(combined_summary_file)>0){
-        controller con_sum;
+    // start processing
+
+    controller con;
+    
+    //  Enrichment Analysis Option
+
+    con.set_a1_cap(cap_a1);
+    int run_enrich = 1;
+    if (p1 != UNDEF && p2 != UNDEF && p12 != UNDEF)
+    {
+        fprintf(stderr,"Applying user-specified colocalization priors, skipping enrichment analysis\n\n");
+        con.set_enrich_params(p1, p2, p12);
+        run_enrich = 0;
+    }else{
+
+        // total_snp is required input now
         
+        if(total_snp == 0){
+            fprintf(stderr, "Error: number of total GWAS variants is unspecified\n\n");
+            exit(2);
+        }
 
-        con_sum.set_a1_cap(cap_a1);
-        con_sum.set_random_seed(random_seed);
-        con_sum.set_prefix(prefix);
-        con_sum.set_coloc_prob_option(coloc_prob_option);
-
-
-
-        vector<double> prior_vec1;
-        if(sdY_eqtl != UNDEF)
-            prior_vec1.push_back(pow(0.15*sdY_eqtl, 2));
-        else if(binary_eqtl)
-            prior_vec1.push_back(0.04);
-
-        vector<double> prior_vec2;
-         if(sdY_gwas != UNDEF)
-            prior_vec2.push_back(pow(0.15*sdY_gwas, 2));
-        else if(binary_gwas)
-            prior_vec2.push_back(0.04);
-
-        con_sum.set_abf_piror_vec(prior_vec1, prior_vec2);
-        con_sum.load_combined_summary(combined_summary_file);
+        con.set_snp_size(total_snp);
 
         if (a0 != UNDEF && a1 != UNDEF)
         {
-            con_sum.set_enrich_params(a0, a1);
-        }
-        else if (p1 != UNDEF && p2 != UNDEF && p12 != UNDEF)
-        {
-            con_sum.set_enrich_params(p1, p2, p12);
-        }
-
-        con_sum.set_sum_conversion(sum_conversion);
-        con_sum.init_pip();
+            fprintf(stderr,"Applying user-specified colocalization priors, skipping enrichment analysis\n\n");
+            con.set_enrich_params(a0, a1);
+            run_enrich = 0; 
         
-        if(a1 == UNDEF && p12 == UNDEF){
-            con_sum.set_imp_num(ImpN);
-            con_sum.set_prior_variance(pv);
-            con_sum.enrich_est();
+        }else{
+            // setup enrichment analysis required parameters
+            con.set_imp_num(ImpN);
+            con.set_random_seed(random_seed);
+            con.set_outlier_control(outlier_control);
+            con.set_prior_variance(pv);
         }
-        /*
-        {
-            con_sum.set_imp_num(ImpN);
-            con_sum.enrich_est();
-        }
-        */
 
-        con_sum.compute_coloc_prob();
-
-
-        exit(0);
     }
 
-    // Input fine-mapping probabilities
 
-    // check required options
+    // input data file format options 
 
-    if (strlen(eqtl_file) == 0)
+    if (strlen(combined_summary_file) > 0)
     {
+        // BF computation options
+        vector<double> prior_vec1;
+        if (sdY_eqtl != UNDEF)
+            prior_vec1.push_back(pow(0.15 * sdY_eqtl, 2));
+        else if (binary_eqtl)
+            prior_vec1.push_back(0.04);
+
+        vector<double> prior_vec2;
+        if (sdY_gwas != UNDEF)
+            prior_vec2.push_back(pow(0.15 * sdY_gwas, 2));
+        else if (binary_gwas)
+            prior_vec2.push_back(0.04);
+
+        con.set_abf_piror_vec(prior_vec1, prior_vec2);
+        con.load_combined_summary(combined_summary_file);
+        con.init_pip();
+
+    } else if (strlen(eqtl_file) == 0){
+        // no eqtl fine-mapping info specified
         fprintf(stderr, "Error: molecular QTL annotation file is unspecified \n\n");
-        print_usage();
         exit(2);
-    }
+    }else{
+         con.load_eqtl(eqtl_file, tissue);
 
-    if (strlen(gwas_file) == 0)
-    {
-        fprintf(stderr, "Error: GWAS fine-mapping  file is unspecified\n\n");
-        print_usage();
-        exit(2);
-    }
-
-    if (total_snp == 0)
-    {
-        fprintf(stderr, "Warning: total number of GWAS variants is unspecified (use \"-tv\" option to specify)\n");
-        set_warning = 1;
-    }
-
-    // print command line options
-
-    fprintf(stderr, "\nParameters and options:\n\n");
-    fprintf(stderr, "Input files:\n");
-    fprintf(stderr, "    * Molecular qtl annotation file: %s\n", eqtl_file);
-    fprintf(stderr, "    * GWAS fine-mapping file: %s\n", gwas_file);
-    if (strlen(tissue) != 0)
-    {
-        fprintf(stderr, "    * Tissue specified: %s\n", tissue);
-    }
-
-    fprintf(stderr, "\nEnrichment parameters:\n");
-    if (p1 != UNDEF || a1 != UNDEF)
-    {
-        fprintf(stderr, "    * Specified, skip estimation procedure\n");
-    }
-    else
-    {
-        fprintf(stderr, "    * Rounds of multiple imputation: %d\n", ImpN);
-        double shp = 1.0;
-        if (shrinkage != -1)
+        if (strlen(gwas_file) == 0)
         {
-            shp = shrinkage;
+            fprintf(stderr, "Error: GWAS fine-mapping file is unspecified\n\n");
+            exit(2);
         }
-        fprintf(stderr, "    * Shrinkage parameter: %.1f\n", shp);
+
+        if (gwas_format == 1)
+            con.load_gwas(gwas_file);
+
+        if (gwas_format == 2)
+            con.load_gwas_torus(gwas_file);
+
     }
 
-    fprintf(stderr, "\nMiscsellaneous options:\n");
-    fprintf(stderr, "    * Total GWAS variants: ");
-    if (total_snp == 0)
-    {
-        fprintf(stderr, "unspecified, use GWAS file input\n");
-    }
-    else
-    {
-        fprintf(stderr, "%d\n", total_snp);
-    }
-
-    fprintf(stderr, "    * Simultaneous running threads: %d\n", nthread);
-
-    fprintf(stderr, "\nOutput options:\n");
-    if (strlen(prefix) != 0)
-        fprintf(stderr, "    * Output file prefix: %s\n", prefix);
-    fprintf(stderr, "    * RCP and SCP output threshold: %.1e\n", output_thresh);
-
-    fprintf(stderr, "\n\n");
-
-    controller con;
-
-    con.set_a1_cap(cap_a1);
-    con.set_imp_num(ImpN);
-    con.set_snp_size(total_snp);
-    con.set_random_seed(random_seed);
-    con.set_thread(nthread);
-    con.set_prefix(prefix);
-    con.set_output_thresh(output_thresh);
-    con.set_outlier_control(outlier_control);
-
-    
-    con.set_prior_variance(pv);
-
-    con.load_eqtl(eqtl_file, tissue);
-
+    // set coloc computational option
     con.set_coloc_prob_option(coloc_prob_option);
 
-    if (gwas_format == 1)
-        con.load_gwas(gwas_file);
+    // set output options
+    con.set_prefix(prefix);
+    con.set_output_thresh(output_thresh);
 
-    if (gwas_format == 2)
-        con.load_gwas_torus(gwas_file);
 
-    if (a0 != UNDEF && a1 != UNDEF)
-    {
-        con.set_enrich_params(a0, a1);
-    }
-    else if (p1 != UNDEF && p2 != UNDEF && p12 != UNDEF)
-    {
-        con.set_enrich_params(p1, p2, p12);
-    }
-    else
-    {
+    // start enrichment analysis
+    if(run_enrich){
         con.enrich_est();
     }
+
     if (!enrich_est_only)
     {
         con.compute_coloc_prob();
     }
-
-    fprintf(stderr, "\nfastENLOC analysis is completed ");
-    if (set_warning == 1)
-    {
-        fprintf(stderr, "with 1 warning");
-    }
-    fprintf(stderr, "\n\n");
+    fprintf(stderr, "\n\n\nFastENLOC analysis is completed\n\n");
 }
