@@ -83,8 +83,8 @@ The columns are:
 + ``CPIP_gwas_marginal``: the cumulative posterior probability that the signal cluster contains a causal GWAS hit, denoted as $\sum_i P(d_i = 1 \mid {\rm  GWAS~ data})$, where variant $i$ is a member SNP 
 + ``CPIP_gwas_qtl_prior``: the cumulative posterior probability that the signal cluster contains a causal GWAS hit, conditional on the hit also being a QTL, denoted as
 $\sum_i P(d_i = 1 \mid {\rm  GWAS~ data}, \gamma_i=1)$, where variant $i$ is a member SNP 
-+ ``RCP``: Signal/Regional-level colocalization probability, denoted as $\sum_i P(d_i=1, \gamma_i=1 \mid {\rm GWAS~data,~QTL~data})$, where variant $i$ is a member SNP 
-+ ``LCP``: Locus-level colcalization probability, denoted as $\sum_{i,j} P(d_i=1, \gamma_j=1 \mid {\rm GWAS~data,~QTL~data})$, where variants $i$ and $j$ are member SNPs. 
++ ``RCP``: Signal/Regional-level colocalization probability, denoted as $\sum_i P(d_i=1, \gamma_i=1 \mid {\rm GWAS~ data,~ QTL~ data})$, where variant $i$ is a member SNP 
++ ``LCP``: Locus-level colcalization probability, denoted as $\sum_{i,j} P(d_i=1, \gamma_j=1 \mid {\rm GWAS~ data,~ QTL~ data})$, where variants $i$ and $j$ are member SNPs. 
 
 Note that LCP is always no smaller than RCP.
 
