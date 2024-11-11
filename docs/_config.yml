@@ -1,4 +1,4 @@
 theme: jekyll-theme-minimal
 title: FastENLOC Tutorial
-description: Tutorial pages for FastENLOC. It will be updated frequently
 author: Xiaoquan (William) Wen
+markdown: kramdown
