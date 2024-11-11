@@ -60,7 +60,7 @@ The columns are:
 + ``PIP_qtl``: the posterior probability of the variant being a QTL, denoted as  $P(\gamma = 1 \mid {\rm  QTL~ data})$
 + ``PIP_gwas_marginal``: the posterior probability of the variant being a GWAS hit, denoted as $P(d = 1 \mid {\rm  GWAS~ data})$
 + ``PIP_gwas_qtl_prior``: the probability of the variant being a GWAS hit, conditional on it being a QTL, denoted as $P(d = 1 \mid {\rm GWAS~ data}, \gamma=1)$   
-+ ``SCP``: SNP-level colocalization probability, denoted as $P(d=1, \gamma=1 \mid {\rm GWAS~data,~QTL~data})$
++ ``SCP``: SNP-level colocalization probability, denoted as $P(d=1, \gamma=1 \mid {\rm GWAS~ data,~ QTL ~ data})$
 
 ### Signal-level Colocalization Probability Output
 
