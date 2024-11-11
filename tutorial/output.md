@@ -1,5 +1,22 @@
 # FastENLOC Output
 
+## Specify Prefix for Output Files
+
+Users can specify a prefix for FastENLOC output files using the -prefix output_prefix option. If this option is not provided, FastENLOC will output files to the current directory with default names:
+
++ enloc.enrich.out
++ enloc.mi.out
++ enloc.snp.out
++ enloc.sig.out
++ enloc.gene.out
+
+The specified prefix can include directory information. For example:
+```
+-prefix output/test
+```
+This will save all output files in the output subdirectory, each beginning with the prefix ``test``. Specifying an output prefix is strongly recommended, as default output files may be overwritten by subsequent FastENLOC runs.
+
+
 ## Enrichment Analysis Output
 
 ### Enrichment Parameter Estimate
@@ -91,7 +108,8 @@ Note that LCP is always no smaller than RCP.
 ### Gene-level Colocalization Probability Output
 
 If the signal clusters in the QTL annotation follows the naming convention ``gene_name:signal_id``, FastENLOC will generate a gene-level colocalization probability output accumulating signal-level colocalization probabilities across the gene with the ID ``gene_name``. 
-A header row is included in the file. Below are the top lines from an example file:
+This file has a suffix ``enloc.gene.out`` and a header row is included. 
+Below are the top lines from an example file:
 ```
  Gene            GRCP    GLCP
 ENSG00000006837         2.669e-03       3.250e-03
