@@ -24,7 +24,7 @@ Software distributed under the terms of the GNU General Public License as publis
 
 ## Quick Start
 
-A detailed tutorial is provided in the [``tutorial``](https://github.com/xqwen/fastenloc/tree/master/docs/).
+Visit the [``tutorial``](https://xqwen.github.io/fastenloc/) for a detailed guide and use case examples.
 
 
 ### Running with Fine-mapping Results
