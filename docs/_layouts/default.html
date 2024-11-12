@@ -11,24 +11,19 @@
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/vs.min.css">
         <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
         <script>hljs.initHighlightingOnLoad();</script>
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({
+              tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+              }
+            });
+          </script>
+          
         <script type="text/javascript" id="MathJax-script" async
             src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
         </script>
-        <script type="text/x-mathjax-config">
-                    MathJax.Hub.Config({
-                      tex2jax: {
-                        inlineMath: [['$','$'], ['\\(','\\)']],
-                        processEscapes: true},
-                        jax: ["input/TeX","input/MathML","input/AsciiMath","output/CommonHTML"],
-                        extensions: ["tex2jax.js","mml2jax.js","asciimath2jax.js","MathMenu.js","MathZoom.js","AssistiveMML.js", "[Contrib]/a11y/accessibility-menu.js"],
-                        TeX: {
-                        extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"],
-                        equationNumbers: {
-                        autoNumber: "AMS"
-                        }
-                      }
-                    });
-                  </script>
+      
         <link rel="stylesheet" href="{{ "
             /assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
         </head>
