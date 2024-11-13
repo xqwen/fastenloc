@@ -17,7 +17,7 @@ All input files can be either compressed (by gzip) or uncompressed, FastENLOC ca
 
 
 
-## Single-SNP summary statistics input
+## Single-SNP Summary Statistics Input
 
 The single-SNP summary statistics input should be provided in a tabular file with the following format:
 ```
@@ -28,7 +28,7 @@ The ``Locus_id`` can be used to represent a gene in an eQTL study. While the sig
 An example input file can be downloaded from [here]().
 
 
-## Probabilistic fine-mapping input
+## Probabilistic Fine-mapping Input
 
 The input for probabilistic fine-mapping follows the standard VCF format, where association information for colocalization analysis is recorded in the INFO field. Separate files are required for molecular and complex traits. Most importantly, FastENLOC expects molecular and complex trait tiles to have matching variant IDs.
 An example input line is shown below:
