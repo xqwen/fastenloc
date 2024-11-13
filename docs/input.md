@@ -17,7 +17,7 @@ All input files can be either compressed (by gzip) or uncompressed, FastENLOC ca
 
 
 
-## Single-SNP Summary Statistics Input
+## 1. Single-SNP Summary Statistics Input
 
 The single-SNP summary statistics input should be provided in a tabular file with the following format:
 ```
@@ -25,10 +25,10 @@ Locus_id   SNP_id   beta_eqtl   se_eqtl    beta_gwas   se_gwas
 ```
 The ``Locus_id`` can be used to represent a gene in an eQTL study. While the signs of ``beta_eqtl`` and ``beta_gwas`` are not critical for the colocalization analysis, it is strongly recommended that both are defined using the same reference allele.
 
-An example input file can be downloaded from [here]().
+An example input file can be downloaded from [here](https://github.com/xqwen/fastenloc/tree/master/sample_data/coloc_test_data.sum).
 
 
-## Probabilistic Fine-mapping Input
+## 2. Probabilistic Fine-mapping Input
 
 The input for probabilistic fine-mapping follows the standard VCF format, where association information for colocalization analysis is recorded in the INFO field. Separate files are required for molecular and complex traits. Most importantly, FastENLOC expects molecular and complex trait tiles to have matching variant IDs.
 An example input line is shown below:
@@ -107,4 +107,14 @@ susie2enloc -dir susie_rst_dir -vcf snp_vcf_file [-tissue tissue_name] | gzip - 
 ```
 
 
+## 3. Hybrid Input
 
+In many applications, users may want to use our GTEx probabilistic annotation for eQTLs along with summary statistics for GWAS data. In earlier versions of FastENLOC, this required processing GWAS summary statistics with TORUS. However, starting from version 3.1, this step is no longer necessary, as we have integrated the primary functionality of TORUS directly into FastENLOC.
+
+To use this functionality, users can provide GWAS summary statistics in the following tabular format:
+
+```
+Locus_id   SNP_id   beta_gwas   se_gwas
+```
+
+This format closely resembles both the combined summary statistics input and the input format for TORUS.

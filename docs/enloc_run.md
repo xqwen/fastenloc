@@ -27,10 +27,21 @@ GWAS annotation files formatted for previous versions of FastENLOC remain compat
 For combined summary statistics files, run colocalization analysis use the following command:
 
 ```
-fastenloc -sum combined_summary_input_file -total_variants
+fastenloc -sum combined_summary_input_file -total_variants total_number_of_variants
 ```
 
-Required option:
-
+where
 + ``-sum``: specify the combined summary statistics input file
 
+
+## Running with Hybrid Input
+
+For hybrid input, where the eQTL file is in probabilistic fine-mapping format and the GWAS file is in summary statistics format, use the following command to run FastENLOC:
+
+```
+fastenloc -eqtl eqtl_annotation -gs gwas_summary_stats_file -total_variants total_number_variants [-t tissue_name]
+```
+
+Note that 
+
++ ``-gs``: specify the summary statistics file containing only GWAS/complex trait information. 
