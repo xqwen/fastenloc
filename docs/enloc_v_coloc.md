@@ -173,7 +173,7 @@ The results demonstrate that colocalization probabilities are sensitive to prior
 ### 2.2 Prior Specification
 
 FastENLOC can estimate colocalization priors directly from the data using a multiple imputation scheme, which is also applicable to summary statistics input.
-For the Okamoto data, the true enrichment parameters are $\alpha_0 = -7.311$  and $\alpha_1 = 5.809$. 
+For the Okamoto data, the true enrichment parameters are $\alpha_0 = -7.31$  and $\alpha_1 = 5.81$. 
 The estimates by FastENLOC are conservative, as expected:
 
 ```
