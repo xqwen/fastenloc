@@ -20,9 +20,9 @@ In the simulation scheme,
 The total $1198 \times 1500 = 1797000$ SNPs can be classified into the following 4 mutually exclusive categories:
 
 1. Colocalized eQTL and GWAS SNPs: $C_{11} = 218 \times 2 = 436$ SNPs
-2. GWAS SNPs that are not eQTLs: $C_{01} = 1198 $ pleiotropic SNPs
+2. GWAS SNPs that are not eQTLs: $C_{01} = 1198$ pleiotropic SNPs
 3. eQTL SNPs that are not GWAS hits: $C_{10} = (1198-218) \times 2 = 1960$ SNPs
-4. SNPs that neither eQTLs nor GWAS hits: $C_{00} = 1797000 - 436 - 1198 - 1960 = 1793406 $ SNPs
+4. SNPs that neither eQTLs nor GWAS hits: $C_{00} = 1797000 - 436 - 1198 - 1960 = 1793406$ SNPs
 
 By constructing a $2 \times 2$ contingency table, we obtain the true $(\alpha_0, \alpha_1)$ values:
 
