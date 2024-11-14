@@ -1,5 +1,3 @@
-
-
 # Input Format
 
 
@@ -55,7 +53,7 @@ chr1	633264	chr1_633264_T_C_b38	T	C	ENSG00000225972:2@Muscle_Skeletal=5.77565e-0
 There is no restriction on the number of annotation entries that can be concatenated.
 
 
-### Use pre-computed GTEx multi-tissue eQTL annotation
+### 2.1 Use pre-computed GTEx multi-tissue eQTL annotation
 
 Simply download appropriate vcf files below. Need to specify ``-tissue`` command line option in FastENLOC analysis. 
 
@@ -66,7 +64,7 @@ When making complex trait file, make sure variant IDs match the corresponding QT
 
 
 
-### Construct fine-mapping input from DAP-G and SuSiE results
+### 2.2 Construct fine-mapping input from DAP-G and SuSiE results
 
 The probabilistic fine-mapping input files can be constructed using the utility scripts provided in the [utility](../utility/) directory. 
 Currently, ``FastENLOC`` supports ``DAP`` and ``SuSiE`` as both provide signal cluster/credible set information required by the FastENLOC colocalization analysis.  
@@ -79,7 +77,7 @@ Upon completing fine-mapping analysis, following the procedures described below 
 3. Provide a VCF file to all annotate all variant's position and allele information. No INFO field is expected or used by the utility tool. 
 
 
-#### Converting DAP output
+#### 2.2.1 Converting DAP output
 
 The DAP output can be directly converted by the utility script ``dap2enloc`` by running 
 ```
@@ -88,7 +86,7 @@ dap2enloc -dir dap_rst_dir -vcf snp_vcf_file [-tissue tissue_name] | gzip - > fa
 
 Note that you can (but don't have to) specify the eQTL dataset name through ``-tissue`` option. This option may be useful if you consider merge eQTL annotations from multiple data sets.
 
-#### Converting SuSiE output
+#### 2.2.2 Converting SuSiE output
 
 For each fine-mapped locus, the SuSiE results should be outputted into a tabular file with the following format
 ```

@@ -1,4 +1,4 @@
-# Command Line Options
+# Command-Line Options
 
 Here is the list of all fastENLOC command-line options
 

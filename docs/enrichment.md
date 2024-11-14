@@ -13,7 +13,7 @@ Treating $d$ and $\gamma$ as missing data, FastENLOC applies a multiple imputati
 	1.	Genome-wide frequency of eQTLs: $~~p_e = P(\gamma = 1)$
 	2.	Genome-wide frequency of GWAS hits: $~~p_g = P(d = 1)$
 
-## Alternative Parameterization 
+## 1. Alternative Parameterization 
 
 The ``coloc`` method parameterizes the prior for colocalized variant by $p_{12}$. 
 It follows that 
@@ -43,7 +43,7 @@ $$ \alpha_1 = \log \left[ \frac{(1-p_{12}-p_1 - p_2) p_{12}}{p_1 p_2} \right],$$
 indicating that the two different parameterizations are equivalent. 
 
 
-## Running Enrichment Analysis
+## 2. Running Enrichment Analysis
 
 The enrichment analysis procedure is integrated into FastENLOC and runs by default. The following command-line options are key for this procedure:
 
@@ -57,12 +57,12 @@ The enrichment analysis procedure is integrated into FastENLOC and runs by defau
 + ``-shrinkage coef``: set the shrinkage coefficient for the $\alpha_1$ estimate. When informative colocalized variants are sparse, the $\alpha_1$ estimate can become unstable, often indicated by a large standard error. In such cases, FastENLOC shrinks $\hat \alpha_1$ toward 0 according to the specified shrinkage coefficient. This coefficient is defined as the inverse of the prior variance on $\alpha_1$ — a larger value increases the shrinkage effect. By default, the shrinkage coefficient is set to 1, which generally performs well across application scenarios.
 
 
-## Estimating Enrichment Prior Only
+## 3. Estimating Enrichment Prior Only
 
 To perform only the enrichment analysis without further calculating colocalization probabilities in FastENLOC, specify the ``--enrich_only`` option on the command line.
 
 
-## Bypassing Enrichment Analysis
+## 4. Bypassing Enrichment Analysis
 
 Users can bypass the enrichment analysis by specifying required priors directly via command-line options. While not recommended as a standard colocalization approach, this option allows sensitivity analysis of colocalization results relative to prior specification.
 
