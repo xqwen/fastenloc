@@ -10,7 +10,7 @@ This dataset includes 1,198 genes from chromosome 5, with each gene’s cis regi
 There are two input files:
 + [okamoto_sim.eqtl.vcf.gz](https://github.com/xqwen/fastenloc/tree/master/sample_data/okamoto_sim.eqtl.vcf.gz)
 + [okamoto_sim.gwas.vcf.gz](https://github.com/xqwen/fastenloc/tree/master/sample_data/okamoto_sim.gwas.vcf.gz)
-that can be directly downloaded. 
+
 
 The analysis results are obtained by running
 ```
@@ -61,6 +61,7 @@ The gene-level quantification of colocalization evidence quantified by GRCP is p
 In this figure, red dots represent genes that truly harbor colocalized variants (based on the [simulation truth](https://github.com/xqwen/fastenloc/tree/master/sample_data/okamoto_sim.casusal_gene.truth) ). It is evident that probabilistic fine-mapping input outperforms summary-statistics input.
 
 Applying the Bayesian FDR control procedure for the GRCPs at 5% level, we obtain the following results:
+
 |     | Rejections | Realized FDR | Power
 | -------- | -------    |------- | ------
 | GRCP (Probabilistic Fine-mapping)  | 60 | 0.000 | 0.275
