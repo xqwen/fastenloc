@@ -22,3 +22,7 @@ The following libraries are assumed for compiling
 + OpenMP library (required only if multi-thread parallel processing is specified) 
 
 To set up these libraries on MacOS, refer to the instructions [here](MacOS_library_setup.md).
+
+## Pre-compiled Executables
+
+Starting from version 3.1, we no longer distribute the pre-compiled binary executables. If you need such supports, write to us directly.
