@@ -3,8 +3,8 @@
 
 ## 1. Pre-processing Examples
 
-+ [Processing DAP-G Fine-mapping Output]()
-+ [Processing SuSiE Fine-mapping Output]()
++ [Processing DAP-G Fine-mapping Output](dap_processing.md)
++ [Processing SuSiE Fine-mapping Output](susie_processing.md)
 
 ## 2. Colocalization Analysis
 
