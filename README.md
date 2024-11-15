@@ -11,13 +11,16 @@ For questions/comments regarding the software package, please contact Xiaoquan (
 ## New Features in Version 3.1
 
 - Unified VCF input format for both complex- and molecular-trait data
-- Approximate computation with only summary-level data
-- Improved computational methods for Bayesian fine-mapping results using signal clusters/credible sets
-- Improved multiple imputation procedure with diagnostic output 
-- Updated tutorial and documentation
-- Utility to convert fine-mapping results from other software tools (e.g., SuSiE)
+- Colocalization computation with only summary-level data (complete compatibility with ``coloc``)
+- Improved computational algorithms for Bayesian fine-mapping results using signal clusters/credible sets
+- Improved multiple imputation procedures with diagnostic output 
+- Utility to convert fine-mapping results from SuSiE and DAP-G
+- Complete tutorial and documentation
+
+
 
 ## License
+
 
 Software distributed under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](http://www.gnu.org/licenses/gpl-3.0.en.html) for more details.
 
