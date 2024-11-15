@@ -46,7 +46,7 @@ foreach $f (@files){
     process_fm($f);
 }
 
-open FILE, "zcat $vcf |";
+open FILE, "gzip -dc $vcf |";
 while(<FILE>){
     next if /^\s*\#/;
     my @data = split /\s+/, $_;
@@ -64,7 +64,8 @@ sub process_fm{
     #  Edit this line to extract gene id from file name      #
     ##########################################################
 
-    $f =~ m{.*/([^/]+)\.[^.]+$}
+    #$f =~ m{.*/([^/]+)\.[^.]+$}
+    $f =~/$dir\/(\S+?)\./;
 
     #########################################################
 
