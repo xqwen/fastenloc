@@ -27,7 +27,9 @@ The total $1198 \times 1500 = 1797000$ SNPs can be classified into the following
 By constructing a $2 \times 2$ contingency table, we obtain the true $(\alpha_0, \alpha_1)$ values:
 
 $$ \alpha_0 = \log\left[ \frac{C_{01}}{C_{00}}\right] = -7.31, $$
+
 and
+
 $$ \alpha_1 = \log\left[\frac{C_{00}C_{11}}{C_{10} C_{01}}\right] = 5.81 $$
 
 The genetic effect for each eQTL and GWAS hit is independently drawn from a normal distribution,  $\text{N}(0, 0.6^2)$ . Consequently, a large proportion of causal variants exhibit small to modest effects, mimicking a setting often observed in real data.
