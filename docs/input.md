@@ -77,6 +77,7 @@ Upon completing fine-mapping analysis, following the procedures described below 
 3. Provide a VCF file to all annotate all variant's position and allele information. No INFO field is expected or used by the utility tool. 
 
 
+
 #### 2.2.1 Converting DAP output
 
 The DAP output can be directly converted by the utility script ``dap2enloc`` by running 
@@ -85,6 +86,8 @@ dap2enloc -dir dap_rst_dir -vcf snp_vcf_file [-tissue tissue_name] | gzip - > fa
 ```
 
 Note that you can (but don't have to) specify the eQTL dataset name through ``-tissue`` option. This option may be useful if you consider merge eQTL annotations from multiple data sets.
+
+See an example with data [here](dap_processing.md).
 
 #### 2.2.2 Converting SuSiE output
 
@@ -103,7 +106,7 @@ The command to run the script is
 ```
 susie2enloc -dir susie_rst_dir -vcf snp_vcf_file [-tissue tissue_name] | gzip - > fastenloc.susie.annotation.vcf.gz
 ```
-
+See an example with data [here](susie_processing.md).
 
 ## 3. Hybrid Input
 
