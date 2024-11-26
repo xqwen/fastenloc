@@ -739,6 +739,9 @@ void controller::enrich_est()
     if (outlier_control)
     {
 
+        if(prior_variance < 0)
+            prior_variance = 1e16;
+
         vector<double> a1_shrink_temp_vec;
         double mean = 0;
         double sd = 0;
