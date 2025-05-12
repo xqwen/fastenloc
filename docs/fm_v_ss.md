@@ -24,7 +24,7 @@ There is a single input file for combined summary statistics input
 
 The analysis results are obtained by running
 ```
-fastenloc -e okamoto_sim.sum_stats.gz -tv 1797000 -prefix ss_rst
+fastenloc -sum okamoto_sim.sum_stats.gz -tv 1797000 -prefix ss_rst
 ```
 
 ## 3. Comparison of Enrichment Analysis

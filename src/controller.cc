@@ -621,7 +621,6 @@ void controller::init_pip()
 
         gzclose(gz_gwas_file);
 
-        exit(0);
     }
 
     gwas_pip_vec = vector<double>(snp_vec.size(), 0.0);
