@@ -1,6 +1,6 @@
 # FastENLOC: Fast Enrichment Estimation Aided Colocalization Analysis
 
-**Version 3.1** 
+**Version 3.2** 
 
 
 This repository contains the software implementation of FastENLOC, which enables integrative genetic association analysis of molecular QTL data and GWAS data. The statistical model and the key computational procedures are described in \[1\], \[2\], \[3\], and \[4\].
@@ -8,7 +8,7 @@ This repository contains the software implementation of FastENLOC, which enables
 For questions/comments regarding the software package, please contact Xiaoquan (William) Wen (xwen at umich dot edu).
 
 
-## New Features in Version 3.1
+## New Features in Version 3.2
 
 - Unified VCF input format for both complex- and molecular-trait data
 - Colocalization computation with only summary-level data (complete compatibility with ``coloc``)
@@ -25,9 +25,9 @@ For questions/comments regarding the software package, please contact Xiaoquan (
 Software distributed under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](http://www.gnu.org/licenses/gpl-3.0.en.html) for more details.
 
 
-## Quick Start
+## [Tutorial](https://xqwen.github.io/fastenloc/)
 
-Visit the [``tutorial``](https://xqwen.github.io/fastenloc/) for a detailed guide and use case examples.
+Visit the [``tutorial``](https://xqwen.github.io/fastenloc/) pages for a detailed guide and use case examples.
 
 
 ### Running with Fine-mapping Results
